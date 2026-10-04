@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>單據殼｜doc</title>
+  <link rel="stylesheet" href="site.css" />
+</head>
+<body>
+  <header class="app-bar">
+    <div class="brand">系統殼範本</div>
+    <nav>
+      <a href="/">首頁</a>
+      <a href="/ui-brief.html">畫面溝通板</a>
+      <a href="/table-sys.html">TABLE 驅動</a>
+      <a class="active" href="/doc.html">單據殼</a>
+      <a href="/exec.html">執行監控</a>
+      <a href="/form.html">表單簽核</a>
+    </nav>
+    <div class="tag">Header + Line + Ledger</div>
+  </header>
+
+  <main class="wrap">
+    <div class="toolbar">
+      <div>
+        <h1 class="page-title">單據殼</h1>
+        <p class="page-sub" style="margin:0">表頭＋明細＋過帳。已過帳唯讀；改數用反沖。</p>
+      </div>
+      <div class="btn-row">
+        <button type="button" class="secondary" id="btnSave">存草稿</button>
+        <button type="button" id="btnPost">過帳</button>
+        <button type="button" class="secondary" id="btnReverse" disabled>反沖</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>表頭 Header</h2>
+      <div class="grid-3" id="headerFields">
+        <label class="field"><span>單號</span><input id="docNo" type="text" value="JV-260210" readonly /></label>
+        <label class="field"><span>狀態</span>
+          <input id="status" type="text" value="草稿" readonly />
+        </label>
+        <label class="field"><span>過帳日</span><input id="postDate" type="text" value="2026-10-04" /></label>
+        <label class="field"><span>成本中心</span><input id="cc" type="text" value="TW-IT-01" /></label>
+        <label class="field"><span>說明</span><input id="memo" type="text" value="十月授權費分攤（假）" /></label>
+        <label class="field"><span>合計</span><input id="total" type="text" value="0" readonly /></label>
+      </div>
+      <p class="note">狀態：<span id="statusBadge" class="status muted">草稿</span></p>
+    </div>
+
+    <div class="panel">
+      <div class="toolbar">
+        <h2 style="margin:0;border:0;padding:0">明細 Line</h2>
+        <button type="button" class="secondary" id="btnAddLine">加列</button>
+      </div>
+      <table class="data" id="lines"></table>
+    </div>
+
+    <div class="grid-2">
+      <div class="panel">
+        <h2>Ledger（只追加）</h2>
+        <table class="data" id="ledger"></table>
+      </div>
+      <div class="panel">
+        <h2>Balance 預覽</h2>
+        <dl class="kv" id="balance"></dl>
+        <p class="note">借貸必須平衡才能過帳（示範規則）。</p>
+      </div>
+    </div>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    let posted = false;
+    let lines = [
+      { id: 1, account: "6101 授權費", dr: 30000, cr: 0, remark: "Adobe" },
+      { id: 2, account: "2103 應付費用", dr: 0, cr: 30000, remark: "月結" }
+    ];
+    let ledger = [];
+
+    const $ = (id) => document.getElementById(id);
+    function toast(msg) {
+      const el = $("toast");
+      el.textContent = msg;
+      el.classList.add("show");
+      clearTimeout(toast._t);
+      toast._t = setTimeout(() => el.classList.remove("show"), 1600);
+    }
+
+    function sums() {
+      const dr = lines.reduce((s, r) => s + Number(r.dr || 0), 0);
+      const cr = lines.reduce((s, r) => s + Number(r.cr || 0), 0);
+      return { dr, cr, bal: dr - cr };
+    }
+
+    function setReadonly(flag) {
+      posted = flag;
+      ["postDate", "cc", "memo"].forEach((id) => { $(id).readOnly = flag; });
+      $("btnPost").disabled = flag;
+      $("btnSave").disabled = flag;
+      $("btnAddLine").disabled = flag;
+      $("btnReverse").disabled = !flag;
+      $("status").value = flag ? "已過帳" : "草稿";
+      $("statusBadge").textContent = $("status").value;
+      $("statusBadge").className = "status " + (flag ? "ok" : "muted");
+    }
+
+    function render() {
+      const { dr, cr, bal } = sums();
+      $("total").value = dr.toLocaleString("zh-TW");
+      $("lines").innerHTML = `
+        <tr><th>科目</th><th>借</th><th>貸</th><th>備註</th><th></th></tr>
+        ${lines.map((r) => `
+          <tr>
+            <td><input data-id="${r.id}" data-k="account" value="${r.account}" ${posted ? "readonly" : ""} /></td>
+            <td><input data-id="${r.id}" data-k="dr" type="text" value="${r.dr}" ${posted ? "readonly" : ""} /></td>
+            <td><input data-id="${r.id}" data-k="cr" type="text" value="${r.cr}" ${posted ? "readonly" : ""} /></td>
+            <td><input data-id="${r.id}" data-k="remark" value="${r.remark}" ${posted ? "readonly" : ""} /></td>
+            <td>${posted ? "" : `<button type="button" class="secondary" data-del="${r.id}">刪</button>`}</td>
+          </tr>
+        `).join("")}
+      `;
+      $("balance").innerHTML = `
+        <dt>借方合計</dt><dd>${dr.toLocaleString("zh-TW")}</dd>
+        <dt>貸方合計</dt><dd>${cr.toLocaleString("zh-TW")}</dd>
+        <dt>差額</dt><dd>${bal === 0 ? '<span class="status ok">平衡</span>' : `<span class="status err">${bal}</span>`}</dd>
+      `;
+      $("ledger").innerHTML = `
+        <tr><th>時間</th><th>事件</th><th>摘要</th></tr>
+        ${ledger.length ? ledger.map((x) => `<tr><td>${x.at}</td><td>${x.event}</td><td>${x.summary}</td></tr>`).join("") : `<tr><td colspan="3">尚無分錄（過帳後追加）</td></tr>`}
+      `;
+    }
+
+    $("lines").addEventListener("input", (e) => {
+      const inp = e.target.closest("input[data-id]");
+      if (!inp || posted) return;
+      const row = lines.find((r) => r.id === Number(inp.dataset.id));
+      if (!row) return;
+      const k = inp.dataset.k;
+      row[k] = (k === "dr" || k === "cr") ? Number(inp.value || 0) : inp.value;
+      render();
+    });
+
+    $("lines").addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-del]");
+      if (!btn || posted) return;
+      lines = lines.filter((r) => r.id !== Number(btn.dataset.del));
+      render();
+    });
+
+    $("btnAddLine").addEventListener("click", () => {
+      if (posted) return;
+      const id = Math.max(0, ...lines.map((r) => r.id)) + 1;
+      lines.push({ id, account: "", dr: 0, cr: 0, remark: "" });
+      render();
+    });
+
+    $("btnSave").addEventListener("click", () => {
+      if (posted) return;
+      ledger.unshift({ at: "剛剛", event: "SAVE", summary: "草稿已存（假）" });
+      toast("草稿已存");
+      render();
+    });
+
+    $("btnPost").addEventListener("click", () => {
+      const { bal, dr } = sums();
+      if (bal !== 0) { toast("借貸不平衡，無法過帳"); return; }
+      setReadonly(true);
+      ledger.unshift({ at: "剛剛", event: "POST", summary: `過帳成功，金額 ${dr}` });
+      toast("已過帳（Ledger 追加）");
+      render();
+    });
+
+    $("btnReverse").addEventListener("click", () => {
+      if (!posted) return;
+      $("docNo").value = $("docNo").value.replace(/-R$/, "") + "-R";
+      lines = lines.map((r, i) => ({ ...r, id: i + 1, dr: r.cr, cr: r.dr, remark: "反沖:" + r.remark }));
+      setReadonly(false);
+      ledger.unshift({ at: "剛剛", event: "REVERSE", summary: "建立反沖草稿（原單保留唯讀意涵）" });
+      toast("已開反沖草稿");
+      render();
+    });
+
+    render();
+  </script>
+</body>
+</html>

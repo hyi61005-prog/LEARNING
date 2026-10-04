@@ -1,0 +1,65 @@
+系統殼範本｜HANDOFF
+日期：2026-10-04
+用途：從雲端對話搬到 GitHub 的本機感覺用 demo（假資料）。
+
+════════════════════════════════
+開站
+════════════════════════════════
+Windows：
+  .\Start-LocalSite.ps1 -Port 8098
+  （IIS Express → Python → HttpListener 備援）
+
+Linux / macOS / Cloud Agent：
+  ./Start-LocalSite.sh 8098
+
+URL：http://localhost:8098/
+
+════════════════════════════════
+頁面
+════════════════════════════════
+/                 首頁
+/ui-brief.html    ★畫面溝通板（跟 AI 說畫面）
+/table-sys.html   全 TABLE 驅動（FieldDef／ActionDef）
+/doc.html         單據殼（表頭＋明細＋過帳）
+/exec.html        執行監控殼
+/form.html        表單簽核殼
+
+檔案：iis/* 、Start-LocalSite.ps1、Start-LocalSite.sh、HANDOFF.txt、README.md
+
+════════════════════════════════
+產品共識（已確認）
+════════════════════════════════
+1) 表單／單據／執行本質相同：提出→等待→通過或失敗→結束
+   差在：申請者是人還是系統；收尾是簽核／過帳／看 Job 紅燈
+2) SAP 味＝多張關聯 TABLE，不是單靠一個 xlsx
+3) 三難點都用表解：
+   - 過帳：Header+Line+Ledger+Balance
+   - 權限：Status+角色；已過帳唯讀，改用反沖
+   - 稽核：Job+Audit；Ledger 只追加
+4) 跟 AI 說畫面（ui-brief）：
+   先選 exec/form/doc/table/report
+   → 只填：目的／區塊上下／必看／主次按鈕／狀態／去向／不要什麼
+   → 對線框 → 複製短口令給 AI
+   不要長設計文、不要假聊天泡泡當主互動
+
+════════════════════════════════
+視覺
+════════════════════════════════
+Segoe UI／Microsoft JhengHei
+背景 #f3f2f1
+主色 #1f4e79
+內網工具感
+
+════════════════════════════════
+約束
+════════════════════════════════
+假資料；不連公司內網／正式庫／SAP；不寫對外信。
+
+════════════════════════════════
+下一輪可選（需點頭）
+════════════════════════════════
+A) exec/form/doc 收斂進單一 table-sys
+B) FieldDef 畫面上可增刪客製欄
+C) 報表殼：條件→結果表→匯出
+D) 持久化：localStorage 或單一 JSON／SQLite
+E) 繼續打磨 ui-brief

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TABLE 驅動｜table-sys</title>
+  <link rel="stylesheet" href="site.css" />
+</head>
+<body>
+  <header class="app-bar">
+    <div class="brand">系統殼範本</div>
+    <nav>
+      <a href="/">首頁</a>
+      <a href="/ui-brief.html">畫面溝通板</a>
+      <a class="active" href="/table-sys.html">TABLE 驅動</a>
+      <a href="/doc.html">單據殼</a>
+      <a href="/exec.html">執行監控</a>
+      <a href="/form.html">表單簽核</a>
+    </nav>
+    <div class="tag">FieldDef / ActionDef</div>
+  </header>
+
+  <main class="wrap">
+    <h1 class="page-title">TABLE 驅動殼</h1>
+    <p class="page-sub">列表、篩選、動作列皆由 FieldDef／ActionDef 驅動。假資料，可點。</p>
+
+    <div class="grid-2">
+      <div class="panel">
+        <h2>FieldDef</h2>
+        <table class="data" id="fieldDef"></table>
+      </div>
+      <div class="panel">
+        <h2>ActionDef</h2>
+        <table class="data" id="actionDef"></table>
+        <p class="note">權限示意：已過帳列不可 Edit；改用 Reverse。</p>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="toolbar">
+        <h2 style="margin:0;border:0;padding:0">資料列（由 Def 渲染）</h2>
+        <div class="btn-row" id="actionBar"></div>
+      </div>
+      <div class="toolbar">
+        <input id="q" type="search" placeholder="關鍵字（單號／申請人）" style="max-width:260px" />
+        <select id="statusFilter" style="max-width:160px">
+          <option value="">全部狀態</option>
+          <option>草稿</option>
+          <option>待簽</option>
+          <option>已過帳</option>
+          <option>失敗</option>
+        </select>
+      </div>
+      <table class="data" id="grid"></table>
+    </div>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const FieldDef = [
+      { key: "docNo", label: "單號", filter: true },
+      { key: "applicant", label: "申請人", filter: true },
+      { key: "amount", label: "金額", align: "right" },
+      { key: "status", label: "狀態", badge: true },
+      { key: "updatedAt", label: "更新" }
+    ];
+
+    const ActionDef = [
+      { id: "refresh", label: "重新整理", primary: false },
+      { id: "create", label: "新建", primary: true },
+      { id: "edit", label: "編輯", needSelect: true, denyStatus: ["已過帳"] },
+      { id: "post", label: "過帳", needSelect: true, allowStatus: ["草稿", "待簽"] },
+      { id: "reverse", label: "反沖", needSelect: true, allowStatus: ["已過帳"] }
+    ];
+
+    let rows = [
+      { id: 1, docNo: "PR-260401", applicant: "王小明", amount: 12000, status: "待簽", updatedAt: "10-04 08:12" },
+      { id: 2, docNo: "PR-260398", applicant: "陳雅婷", amount: 850, status: "草稿", updatedAt: "10-03 17:40" },
+      { id: 3, docNo: "JV-260112", applicant: "系統批次", amount: 50000, status: "已過帳", updatedAt: "10-02 09:01" },
+      { id: 4, docNo: "JOB-8841", applicant: "排程", amount: 0, status: "失敗", updatedAt: "10-04 06:55" }
+    ];
+    let selectedId = 1;
+
+    const $ = (id) => document.getElementById(id);
+    function toast(msg) {
+      const el = $("toast");
+      el.textContent = msg;
+      el.classList.add("show");
+      clearTimeout(toast._t);
+      toast._t = setTimeout(() => el.classList.remove("show"), 1500);
+    }
+
+    function statusClass(s) {
+      if (s === "已過帳") return "ok";
+      if (s === "待簽") return "info";
+      if (s === "失敗") return "err";
+      return "muted";
+    }
+
+    function renderDefs() {
+      $("fieldDef").innerHTML = `<tr><th>key</th><th>label</th><th>filter</th></tr>` +
+        FieldDef.map((f) => `<tr><td><code>${f.key}</code></td><td>${f.label}</td><td>${f.filter ? "Y" : ""}</td></tr>`).join("");
+      $("actionDef").innerHTML = `<tr><th>id</th><th>label</th><th>規則</th></tr>` +
+        ActionDef.map((a) => {
+          const rule = [
+            a.primary ? "primary" : "",
+            a.needSelect ? "需選列" : "",
+            a.denyStatus ? `禁:${a.denyStatus.join(",")}` : "",
+            a.allowStatus ? `允:${a.allowStatus.join(",")}` : ""
+          ].filter(Boolean).join(" · ");
+          return `<tr><td><code>${a.id}</code></td><td>${a.label}</td><td>${rule || "-"}</td></tr>`;
+        }).join("");
+    }
+
+    function filteredRows() {
+      const q = $("q").value.trim();
+      const st = $("statusFilter").value;
+      return rows.filter((r) => {
+        if (st && r.status !== st) return false;
+        if (!q) return true;
+        return `${r.docNo}${r.applicant}`.includes(q);
+      });
+    }
+
+    function canRun(action, row) {
+      if (action.needSelect && !row) return false;
+      if (!row) return true;
+      if (action.denyStatus && action.denyStatus.includes(row.status)) return false;
+      if (action.allowStatus && !action.allowStatus.includes(row.status)) return false;
+      return true;
+    }
+
+    function renderActions() {
+      const row = rows.find((r) => r.id === selectedId);
+      $("actionBar").innerHTML = ActionDef.map((a) => {
+        const ok = canRun(a, a.needSelect ? row : null);
+        return `<button type="button" class="${a.primary ? "" : "secondary"}" data-act="${a.id}" ${ok ? "" : "disabled"}>${a.label}</button>`;
+      }).join("");
+    }
+
+    function renderGrid() {
+      const data = filteredRows();
+      $("grid").innerHTML = `<tr><th></th>${FieldDef.map((f) => `<th>${f.label}</th>`).join("")}</tr>` +
+        data.map((r) => `
+          <tr data-id="${r.id}" style="${r.id === selectedId ? "background:#e8f1f8" : ""}">
+            <td><input type="radio" name="sel" ${r.id === selectedId ? "checked" : ""} /></td>
+            ${FieldDef.map((f) => {
+              let v = r[f.key];
+              if (f.key === "amount") v = Number(v).toLocaleString("zh-TW");
+              if (f.badge) v = `<span class="status ${statusClass(r.status)}">${r.status}</span>`;
+              return `<td>${v}</td>`;
+            }).join("")}
+          </tr>
+        `).join("");
+      renderActions();
+    }
+
+    $("grid").addEventListener("click", (e) => {
+      const tr = e.target.closest("tr[data-id]");
+      if (!tr) return;
+      selectedId = Number(tr.dataset.id);
+      renderGrid();
+    });
+
+    $("actionBar").addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-act]");
+      if (!btn || btn.disabled) return;
+      const act = ActionDef.find((a) => a.id === btn.dataset.act);
+      const row = rows.find((r) => r.id === selectedId);
+      if (act.id === "refresh") { renderGrid(); toast("已重新整理"); return; }
+      if (act.id === "create") {
+        const id = Math.max(...rows.map((r) => r.id)) + 1;
+        rows.unshift({ id, docNo: `PR-26${1000 + id}`, applicant: "新申請", amount: 0, status: "草稿", updatedAt: "剛剛" });
+        selectedId = id;
+        renderGrid();
+        toast("已新建草稿");
+        return;
+      }
+      if (!row) return;
+      if (act.id === "edit") { toast(`編輯 ${row.docNo}（示範）`); return; }
+      if (act.id === "post") {
+        row.status = "已過帳";
+        row.updatedAt = "剛剛";
+        renderGrid();
+        toast(`${row.docNo} 已過帳（假）`);
+        return;
+      }
+      if (act.id === "reverse") {
+        const id = Math.max(...rows.map((r) => r.id)) + 1;
+        rows.unshift({
+          id,
+          docNo: row.docNo + "-R",
+          applicant: row.applicant,
+          amount: -row.amount,
+          status: "草稿",
+          updatedAt: "剛剛"
+        });
+        selectedId = id;
+        renderGrid();
+        toast(`已建立反沖草稿 ${rows[0].docNo}`);
+      }
+    });
+
+    $("q").addEventListener("input", renderGrid);
+    $("statusFilter").addEventListener("change", renderGrid);
+
+    renderDefs();
+    renderGrid();
+  </script>
+</body>
+</html>

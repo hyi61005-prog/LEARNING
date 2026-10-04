@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>執行監控｜exec</title>
+  <link rel="stylesheet" href="site.css" />
+</head>
+<body>
+  <header class="app-bar">
+    <div class="brand">系統殼範本</div>
+    <nav>
+      <a href="/">首頁</a>
+      <a href="/ui-brief.html">畫面溝通板</a>
+      <a href="/table-sys.html">TABLE 驅動</a>
+      <a href="/doc.html">單據殼</a>
+      <a class="active" href="/exec.html">執行監控</a>
+      <a href="/form.html">表單簽核</a>
+    </nav>
+    <div class="tag">Job + Audit</div>
+  </header>
+
+  <main class="wrap">
+    <h1 class="page-title">執行監控殼</h1>
+    <p class="page-sub">值班看紅燈：選 Job → 看 Audit → 重跑。申請者是系統／排程。</p>
+
+    <div class="panel">
+      <div class="toolbar">
+        <div class="btn-row">
+          <select id="sys">
+            <option value="">全部系統</option>
+            <option>SAP-FI</option>
+            <option>HR-Sync</option>
+            <option>EDI</option>
+          </select>
+          <select id="st">
+            <option value="">全部狀態</option>
+            <option>失敗</option>
+            <option>執行中</option>
+            <option>成功</option>
+            <option>等待重試</option>
+          </select>
+          <input id="q" type="search" placeholder="Job 名稱／ID" style="max-width:220px" />
+        </div>
+        <div class="btn-row">
+          <button type="button" id="btnRetry">重跑選中</button>
+          <button type="button" class="secondary" id="btnExport">匯出 CSV</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="panel">
+        <h2>Job 列表</h2>
+        <table class="data" id="jobs"></table>
+      </div>
+      <div class="panel">
+        <h2>Audit 摘要</h2>
+        <dl class="kv" id="meta"></dl>
+        <table class="data" id="audit" style="margin-top:10px"></table>
+      </div>
+    </div>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    let jobs = [
+      { id: "JOB-8841", name: "FI_POST_NIGHT", sys: "SAP-FI", status: "失敗", start: "06:40", end: "06:41", dur: "52s", audit: [
+        { t: "06:40:01", lv: "INFO", msg: "開始讀取待過帳佇列" },
+        { t: "06:40:48", lv: "ERROR", msg: "Balance mismatch doc JV-260112" },
+        { t: "06:41:00", lv: "INFO", msg: "標記失敗，等待人工" }
+      ]},
+      { id: "JOB-8837", name: "HR_EMP_SYNC", sys: "HR-Sync", status: "成功", start: "05:00", end: "05:07", dur: "7m", audit: [
+        { t: "05:00:01", lv: "INFO", msg: "拉取 128 筆" },
+        { t: "05:07:12", lv: "INFO", msg: "寫入完成" }
+      ]},
+      { id: "JOB-8830", name: "EDI_IN_850", sys: "EDI", status: "執行中", start: "06:50", end: "-", dur: "-", audit: [
+        { t: "06:50:00", lv: "INFO", msg: "解析中…" }
+      ]},
+      { id: "JOB-8822", name: "FI_RETRY_QUEUE", sys: "SAP-FI", status: "等待重試", start: "06:20", end: "-", dur: "-", audit: [
+        { t: "06:20:00", lv: "WARN", msg: "第 2/3 次重試排程於 07:00" }
+      ]}
+    ];
+    let selected = "JOB-8841";
+
+    const $ = (id) => document.getElementById(id);
+    function toast(msg) {
+      const el = $("toast");
+      el.textContent = msg;
+      el.classList.add("show");
+      clearTimeout(toast._t);
+      toast._t = setTimeout(() => el.classList.remove("show"), 1500);
+    }
+
+    function badge(st) {
+      const map = { "失敗": "err", "成功": "ok", "執行中": "info", "等待重試": "warn" };
+      return `<span class="status ${map[st] || "muted"}">${st}</span>`;
+    }
+
+    function filtered() {
+      const sys = $("sys").value;
+      const st = $("st").value;
+      const q = $("q").value.trim();
+      return jobs.filter((j) => {
+        if (sys && j.sys !== sys) return false;
+        if (st && j.status !== st) return false;
+        if (q && !`${j.id}${j.name}`.includes(q)) return false;
+        return true;
+      });
+    }
+
+    function render() {
+      const list = filtered();
+      if (!list.find((j) => j.id === selected) && list[0]) selected = list[0].id;
+      $("jobs").innerHTML = `
+        <tr><th>狀態</th><th>Job</th><th>系統</th><th>開始</th><th>耗時</th></tr>
+        ${list.map((j) => `
+          <tr data-id="${j.id}" style="${j.id === selected ? "background:#e8f1f8" : ""}">
+            <td>${badge(j.status)}</td>
+            <td><strong>${j.id}</strong><br /><span class="note" style="margin:0">${j.name}</span></td>
+            <td>${j.sys}</td>
+            <td>${j.start}</td>
+            <td>${j.dur}</td>
+          </tr>
+        `).join("") || `<tr><td colspan="5">無資料</td></tr>`}
+      `;
+      const job = jobs.find((j) => j.id === selected);
+      if (!job) return;
+      $("meta").innerHTML = `
+        <dt>Job</dt><dd>${job.id} / ${job.name}</dd>
+        <dt>系統</dt><dd>${job.sys}</dd>
+        <dt>狀態</dt><dd>${badge(job.status)}</dd>
+        <dt>區間</dt><dd>${job.start} → ${job.end}</dd>
+      `;
+      $("audit").innerHTML = `
+        <tr><th>時間</th><th>等級</th><th>訊息</th></tr>
+        ${job.audit.map((a) => `<tr><td>${a.t}</td><td>${a.lv}</td><td>${a.msg}</td></tr>`).join("")}
+      `;
+    }
+
+    $("jobs").addEventListener("click", (e) => {
+      const tr = e.target.closest("tr[data-id]");
+      if (!tr) return;
+      selected = tr.dataset.id;
+      render();
+    });
+
+    ["sys", "st", "q"].forEach((id) => $(id).addEventListener("input", render));
+    $("st").addEventListener("change", render);
+    $("sys").addEventListener("change", render);
+
+    $("btnRetry").addEventListener("click", () => {
+      const job = jobs.find((j) => j.id === selected);
+      if (!job) return;
+      job.status = "執行中";
+      job.start = "剛剛";
+      job.end = "-";
+      job.dur = "-";
+      job.audit = [{ t: "剛剛", lv: "INFO", msg: "人工重跑已送出（假）" }, ...job.audit];
+      toast(`已重跑 ${job.id}`);
+      render();
+    });
+
+    $("btnExport").addEventListener("click", () => {
+      const lines = ["id,name,sys,status,start,dur"].concat(
+        filtered().map((j) => [j.id, j.name, j.sys, j.status, j.start, j.dur].join(","))
+      );
+      const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "jobs-demo.csv";
+      a.click();
+      toast("已匯出 CSV（假資料）");
+    });
+
+    render();
+  </script>
+</body>
+</html>

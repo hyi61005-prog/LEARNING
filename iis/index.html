@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>系統殼範本｜首頁</title>
+  <link rel="stylesheet" href="site.css" />
+</head>
+<body>
+  <header class="app-bar">
+    <div class="brand">系統殼範本</div>
+    <nav>
+      <a class="active" href="/">首頁</a>
+      <a href="/ui-brief.html">畫面溝通板</a>
+      <a href="/table-sys.html">TABLE 驅動</a>
+      <a href="/doc.html">單據殼</a>
+      <a href="/exec.html">執行監控</a>
+      <a href="/form.html">表單簽核</a>
+    </nav>
+    <div class="tag">假資料 · 本機 demo</div>
+  </header>
+
+  <main class="wrap">
+    <h1 class="page-title">內網工具殼 · 本機 demo</h1>
+    <p class="page-sub">提出 → 等待 → 通過／失敗 → 結束。差在申請者是人或系統，收尾是簽核／過帳／看 Job 紅燈。</p>
+
+    <div class="grid-2">
+      <a class="pill-link" href="/ui-brief.html">
+        <strong>★ 畫面溝通板 /ui-brief.html</strong>
+        選殼型 → 填短欄 → 對線框 → 複製口令給 AI。不要長設計文。
+      </a>
+      <a class="pill-link" href="/table-sys.html">
+        <strong>TABLE 驅動 /table-sys.html</strong>
+        FieldDef／ActionDef 驅動列表、篩選、動作列。SAP 味＝多張關聯 TABLE。
+      </a>
+      <a class="pill-link" href="/doc.html">
+        <strong>單據殼 /doc.html</strong>
+        表頭＋明細＋過帳；Header+Line+Ledger+Balance。
+      </a>
+      <a class="pill-link" href="/exec.html">
+        <strong>執行監控 /exec.html</strong>
+        Job 列表＋紅燈＋Audit；Ledger 只追加。
+      </a>
+      <a class="pill-link" href="/form.html">
+        <strong>表單簽核 /form.html</strong>
+        Status＋角色；已過帳唯讀，改用反沖。
+      </a>
+      <div class="panel" style="margin:0">
+        <h2>開站</h2>
+        <p style="margin:0 0 6px"><code>Windows: .\Start-LocalSite.ps1 -Port 8098</code></p>
+        <p style="margin:0"><code>Linux: ./Start-LocalSite.sh 8098</code></p>
+        <p class="note">URL：http://localhost:8098/ · 詳見 HANDOFF.txt</p>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>畫面溝通板｜ui-brief</title>
+  <link rel="stylesheet" href="site.css" />
+  <style>
+    .preset-bar { margin-bottom: 12px; }
+    .two-col {
+      display: grid;
+      grid-template-columns: minmax(280px, 1fr) minmax(280px, 1fr);
+      gap: 14px;
+    }
+    @media (max-width: 900px) {
+      .two-col { grid-template-columns: 1fr; }
+    }
+    .type-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    @media (max-width: 700px) {
+      .type-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    .type-btn {
+      border: 1px solid #c8c6c4;
+      background: #fff;
+      padding: 10px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font: inherit;
+      text-align: center;
+    }
+    .type-btn small { display: block; color: var(--muted); margin-top: 2px; font-size: 11px; }
+    .type-btn.active {
+      border-color: var(--primary);
+      background: #e8f1f8;
+      color: var(--primary);
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+  <header class="app-bar">
+    <div class="brand">系統殼範本</div>
+    <nav>
+      <a href="/">首頁</a>
+      <a class="active" href="/ui-brief.html">畫面溝通板</a>
+      <a href="/table-sys.html">TABLE 驅動</a>
+      <a href="/doc.html">單據殼</a>
+      <a href="/exec.html">執行監控</a>
+      <a href="/form.html">表單簽核</a>
+    </nav>
+    <div class="tag">跟 AI 說畫面</div>
+  </header>
+
+  <main class="wrap">
+    <h1 class="page-title">畫面溝通板</h1>
+    <p class="page-sub">先選殼型 → 只填短欄 → 對線框 → 複製口令。不要長設計文、不要假聊天泡泡。</p>
+
+    <div class="panel preset-bar">
+      <h2>快速預設</h2>
+      <div class="chip-row" id="presets"></div>
+    </div>
+
+    <div class="panel">
+      <h2>1. 殼型</h2>
+      <div class="type-grid" id="types"></div>
+    </div>
+
+    <div class="two-col">
+      <div class="panel">
+        <h2>2. 短欄（只填這些）</h2>
+        <label class="field"><span>目的</span><input id="f-goal" type="text" /></label>
+        <label class="field"><span>區塊上下（由上到下）</span><textarea id="f-blocks"></textarea></label>
+        <label class="field"><span>必看</span><input id="f-must" type="text" /></label>
+        <label class="field"><span>主按鈕 / 次按鈕</span><input id="f-btns" type="text" placeholder="主：重跑｜次：詳情、匯出" /></label>
+        <label class="field"><span>狀態</span><input id="f-status" type="text" placeholder="執行中／成功／失敗／等待" /></label>
+        <label class="field"><span>去向</span><input id="f-goto" type="text" placeholder="點列 → Job 詳情；失敗 → Audit" /></label>
+        <label class="field"><span>不要什麼</span><input id="f-no" type="text" /></label>
+        <div class="btn-row">
+          <button type="button" id="btn-sync">對線框</button>
+          <button type="button" class="secondary" id="btn-copy">複製短口令</button>
+          <button type="button" class="secondary" id="btn-clear">清空</button>
+        </div>
+        <p class="note" id="copy-hint">口令會即時更新；手機可長按下方文字框全選複製。</p>
+      </div>
+
+      <div class="panel">
+        <h2>3. 線框對齊</h2>
+        <div class="wire" id="wire"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>4. 短口令（給 AI）</h2>
+      <div class="toolbar">
+        <span class="note" style="margin:0">可貼到 Cursor／Chat：直接當畫面規格。</span>
+        <button type="button" id="btn-copy2">再複製一次</button>
+      </div>
+      <pre class="prompt-box" id="prompt" tabindex="0"></pre>
+    </div>
+  </main>
+
+  <div class="toast" id="toast">已複製</div>
+
+  <script>
+    const TYPES = [
+      { id: "exec", label: "exec", tip: "執行監控" },
+      { id: "form", label: "form", tip: "表單簽核" },
+      { id: "doc", label: "doc", tip: "單據過帳" },
+      { id: "table", label: "table", tip: "TABLE 驅動" },
+      { id: "report", label: "report", tip: "條件→結果" }
+    ];
+
+    const PRESETS = {
+      watchdesk: {
+        name: "監控值班台",
+        type: "exec",
+        goal: "值班看 Job 紅燈，失敗可進 Audit 或重跑",
+        blocks: "篩選列（系統／狀態／關鍵字）\nJob 列表（狀態燈＋開始／結束＋耗時）\n右側／下方：選中列的 Audit 摘要",
+        must: "紅燈失敗列、最近失敗時間、重跑按鈕",
+        btns: "主：重跑選中｜次：開 Audit、匯出 CSV",
+        status: "執行中／成功／失敗／等待重試",
+        goto: "點列→Audit；重跑→同一 Job 新執行；匯出→下載",
+        no: "不要聊天泡泡、不要儀表板小卡牆、不要長說明文"
+      },
+      approve: {
+        name: "簽核待辦",
+        type: "form",
+        goal: "審核人一次處理待簽，通過或退回",
+        blocks: "待簽列表\n表單摘要（申請人／金額／事由）\n簽核意見＋主次按鈕",
+        must: "目前狀態、申請人、金額、意見欄",
+        btns: "主：通過｜次：退回、轉簽",
+        status: "草稿／待簽／已通過／已退回",
+        goto: "通過→下一筆或列表；退回→申請人",
+        no: "不要華麗卡片、不要首屏塞統計"
+      },
+      posting: {
+        name: "單據過帳",
+        type: "doc",
+        goal: "核對表頭明細後過帳，寫入 Ledger",
+        blocks: "表頭\n明細表\n過帳結果／Ledger 預覽",
+        must: "單號、狀態、合計、過帳／反沖",
+        btns: "主：過帳｜次：存草稿、反沖",
+        status: "草稿／已過帳／已反沖",
+        goto: "過帳成功→唯讀；改數→反沖新單",
+        no: "不要直接改已過帳列"
+      }
+    };
+
+    const state = {
+      type: "exec",
+      goal: "",
+      blocks: "",
+      must: "",
+      btns: "",
+      status: "",
+      goto: "",
+      no: ""
+    };
+
+    const $ = (id) => document.getElementById(id);
+
+    function toast(msg) {
+      const el = $("toast");
+      el.textContent = msg;
+      el.classList.add("show");
+      clearTimeout(toast._t);
+      toast._t = setTimeout(() => el.classList.remove("show"), 1600);
+    }
+
+    function readFields() {
+      state.goal = $("f-goal").value.trim();
+      state.blocks = $("f-blocks").value.trim();
+      state.must = $("f-must").value.trim();
+      state.btns = $("f-btns").value.trim();
+      state.status = $("f-status").value.trim();
+      state.goto = $("f-goto").value.trim();
+      state.no = $("f-no").value.trim();
+    }
+
+    function writeFields() {
+      $("f-goal").value = state.goal;
+      $("f-blocks").value = state.blocks;
+      $("f-must").value = state.must;
+      $("f-btns").value = state.btns;
+      $("f-status").value = state.status;
+      $("f-goto").value = state.goto;
+      $("f-no").value = state.no;
+    }
+
+    function buildPrompt() {
+      readFields();
+      const typeMeta = TYPES.find((t) => t.id === state.type);
+      const lines = [
+        `【畫面口令｜${typeMeta ? typeMeta.tip : state.type}／${state.type}】`,
+        `目的：${state.goal || "（未填）"}`,
+        `區塊上→下：`,
+        ...(state.blocks ? state.blocks.split(/\n+/).map((b) => `- ${b}`) : ["- （未填）"]),
+        `必看：${state.must || "（未填）"}`,
+        `按鈕：${state.btns || "（未填）"}`,
+        `狀態：${state.status || "（未填）"}`,
+        `去向：${state.goto || "（未填）"}`,
+        `不要：${state.no || "（未填）"}`,
+        `約束：假資料；內網工具感（#f3f2f1／#1f4e79）；可點殼，不大改架構。`
+      ];
+      return lines.join("\n");
+    }
+
+    function renderPrompt() {
+      $("prompt").textContent = buildPrompt();
+    }
+
+    function renderTypes() {
+      $("types").innerHTML = TYPES.map((t) => `
+        <button type="button" class="type-btn ${state.type === t.id ? "active" : ""}" data-type="${t.id}">
+          ${t.label}<small>${t.tip}</small>
+        </button>
+      `).join("");
+    }
+
+    function renderPresets() {
+      $("presets").innerHTML = Object.entries(PRESETS).map(([id, p]) => `
+        <button type="button" class="chip ${id === "watchdesk" ? "active" : ""}" data-preset="${id}">${p.name}</button>
+      `).join("");
+    }
+
+    function renderWire() {
+      readFields();
+      const blocks = state.blocks
+        ? state.blocks.split(/\n+/).map((s) => s.trim()).filter(Boolean)
+        : ["（先填區塊上下）"];
+      const must = state.must || "必看項目";
+      $("wire").innerHTML = [
+        `<div class="block"><div class="t">殼型</div><div class="b">${state.type}</div></div>`,
+        ...blocks.map((b, i) => `
+          <div class="block ${i === 0 ? "primary-block" : ""}">
+            <div class="t">區塊 ${i + 1}${i === 0 ? " · 主區" : ""}</div>
+            <div class="b">${escapeHtml(b)}</div>
+          </div>
+        `),
+        `<div class="block"><div class="t">必看</div><div class="b">${escapeHtml(must)}</div></div>`,
+        `<div class="block"><div class="t">按鈕</div><div class="b">${escapeHtml(state.btns || "主／次")}</div></div>`
+      ].join("");
+    }
+
+    function escapeHtml(s) {
+      return String(s)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+
+    function applyPreset(id) {
+      const p = PRESETS[id];
+      if (!p) return;
+      state.type = p.type;
+      state.goal = p.goal;
+      state.blocks = p.blocks;
+      state.must = p.must;
+      state.btns = p.btns;
+      state.status = p.status;
+      state.goto = p.goto;
+      state.no = p.no;
+      writeFields();
+      document.querySelectorAll("#presets .chip").forEach((el) => {
+        el.classList.toggle("active", el.dataset.preset === id);
+      });
+      renderTypes();
+      renderWire();
+      renderPrompt();
+      toast(`已套用：${p.name}`);
+    }
+
+    async function copyPrompt() {
+      const text = buildPrompt();
+      $("prompt").textContent = text;
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(text);
+        } else {
+          const ta = document.createElement("textarea");
+          ta.value = text;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand("copy");
+          ta.remove();
+        }
+        toast("短口令已複製");
+      } catch (e) {
+        $("prompt").focus();
+        const sel = window.getSelection();
+        const range = document.createRange();
+        range.selectNodeContents($("prompt"));
+        sel.removeAllRanges();
+        sel.addRange(range);
+        toast("請手動複製已選取文字");
+      }
+    }
+
+    function clearAll() {
+      state.goal = state.blocks = state.must = state.btns = state.status = state.goto = state.no = "";
+      writeFields();
+      document.querySelectorAll("#presets .chip").forEach((el) => el.classList.remove("active"));
+      renderWire();
+      renderPrompt();
+    }
+
+    $("types").addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-type]");
+      if (!btn) return;
+      state.type = btn.dataset.type;
+      renderTypes();
+      renderWire();
+      renderPrompt();
+    });
+
+    $("presets").addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-preset]");
+      if (!btn) return;
+      applyPreset(btn.dataset.preset);
+    });
+
+    ["f-goal","f-blocks","f-must","f-btns","f-status","f-goto","f-no"].forEach((id) => {
+      $(id).addEventListener("input", () => {
+        renderWire();
+        renderPrompt();
+      });
+    });
+
+    $("btn-sync").addEventListener("click", () => {
+      renderWire();
+      renderPrompt();
+      toast("已對齊線框");
+    });
+    $("btn-copy").addEventListener("click", copyPrompt);
+    $("btn-copy2").addEventListener("click", copyPrompt);
+    $("btn-clear").addEventListener("click", clearAll);
+
+    renderPresets();
+    renderTypes();
+    applyPreset("watchdesk");
+  </script>
+</body>
+</html>

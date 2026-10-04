@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>表單簽核｜form</title>
+  <link rel="stylesheet" href="site.css" />
+</head>
+<body>
+  <header class="app-bar">
+    <div class="brand">系統殼範本</div>
+    <nav>
+      <a href="/">首頁</a>
+      <a href="/ui-brief.html">畫面溝通板</a>
+      <a href="/table-sys.html">TABLE 驅動</a>
+      <a href="/doc.html">單據殼</a>
+      <a href="/exec.html">執行監控</a>
+      <a class="active" href="/form.html">表單簽核</a>
+    </nav>
+    <div class="tag">Status + 角色</div>
+  </header>
+
+  <main class="wrap">
+    <h1 class="page-title">表單簽核殼</h1>
+    <p class="page-sub">人提單 → 等待 → 通過／退回。角色決定可按的按鈕。</p>
+
+    <div class="toolbar">
+      <label class="field" style="margin:0;min-width:180px">
+        <span>目前角色（假）</span>
+        <select id="role">
+          <option value="approver">審核人</option>
+          <option value="applicant">申請人</option>
+          <option value="viewer">唯讀</option>
+        </select>
+      </label>
+      <span class="note" id="roleHint" style="margin:0"></span>
+    </div>
+
+    <div class="grid-2">
+      <div class="panel">
+        <h2>待辦列表</h2>
+        <table class="data" id="list"></table>
+      </div>
+      <div class="panel">
+        <h2>表單摘要</h2>
+        <dl class="kv" id="detail"></dl>
+        <label class="field" style="margin-top:12px">
+          <span>簽核意見</span>
+          <textarea id="comment" placeholder="必填於退回"></textarea>
+        </label>
+        <div class="btn-row" id="actions"></div>
+        <p class="note">已通過／已退回後主流程結束；要改內容請申請人開新單（示範）。</p>
+      </div>
+    </div>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    let items = [
+      { id: "AF-10021", title: "筆電請購", applicant: "林佳穎", amount: 42000, status: "待簽", reason: "研發新人配機", history: ["10-03 送出"] },
+      { id: "AF-10018", title: "差旅報支", applicant: "周志豪", amount: 6800, status: "待簽", reason: "高雄客戶訪視", history: ["10-02 送出"] },
+      { id: "AF-10005", title: "軟體授權", applicant: "王小明", amount: 12000, status: "已通過", reason: "設計工具續約", history: ["09-28 送出", "09-29 通過"] }
+    ];
+    let selected = "AF-10021";
+    let role = "approver";
+
+    const $ = (id) => document.getElementById(id);
+    function toast(msg) {
+      const el = $("toast");
+      el.textContent = msg;
+      el.classList.add("show");
+      clearTimeout(toast._t);
+      toast._t = setTimeout(() => el.classList.remove("show"), 1500);
+    }
+
+    function badge(st) {
+      const map = { "待簽": "info", "已通過": "ok", "已退回": "err", "草稿": "muted" };
+      return `<span class="status ${map[st] || "muted"}">${st}</span>`;
+    }
+
+    function render() {
+      role = $("role").value;
+      const hints = {
+        approver: "可：通過／退回／轉簽",
+        applicant: "可：撤回（待簽時）",
+        viewer: "僅檢視"
+      };
+      $("roleHint").textContent = hints[role];
+
+      $("list").innerHTML = `
+        <tr><th>單號</th><th>主旨</th><th>狀態</th></tr>
+        ${items.map((x) => `
+          <tr data-id="${x.id}" style="${x.id === selected ? "background:#e8f1f8" : ""}">
+            <td>${x.id}</td>
+            <td>${x.title}<br /><span class="note" style="margin:0">${x.applicant} · ${x.amount.toLocaleString("zh-TW")}</span></td>
+            <td>${badge(x.status)}</td>
+          </tr>
+        `).join("")}
+      `;
+
+      const it = items.find((x) => x.id === selected);
+      if (!it) return;
+      $("detail").innerHTML = `
+        <dt>單號</dt><dd>${it.id}</dd>
+        <dt>主旨</dt><dd>${it.title}</dd>
+        <dt>申請人</dt><dd>${it.applicant}</dd>
+        <dt>金額</dt><dd>${it.amount.toLocaleString("zh-TW")}</dd>
+        <dt>事由</dt><dd>${it.reason}</dd>
+        <dt>狀態</dt><dd>${badge(it.status)}</dd>
+        <dt>歷程</dt><dd>${it.history.join(" → ")}</dd>
+      `;
+
+      const btns = [];
+      if (role === "approver" && it.status === "待簽") {
+        btns.push(`<button type="button" data-act="pass">通過</button>`);
+        btns.push(`<button type="button" class="secondary" data-act="reject">退回</button>`);
+        btns.push(`<button type="button" class="secondary" data-act="transfer">轉簽</button>`);
+      } else if (role === "applicant" && it.status === "待簽") {
+        btns.push(`<button type="button" class="secondary" data-act="withdraw">撤回</button>`);
+      } else {
+        btns.push(`<button type="button" class="secondary" disabled>無可用動作</button>`);
+      }
+      $("actions").innerHTML = btns.join("");
+    }
+
+    $("list").addEventListener("click", (e) => {
+      const tr = e.target.closest("tr[data-id]");
+      if (!tr) return;
+      selected = tr.dataset.id;
+      $("comment").value = "";
+      render();
+    });
+
+    $("role").addEventListener("change", render);
+
+    $("actions").addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-act]");
+      if (!btn) return;
+      const it = items.find((x) => x.id === selected);
+      if (!it) return;
+      const act = btn.dataset.act;
+      const c = $("comment").value.trim();
+      if (act === "pass") {
+        it.status = "已通過";
+        it.history.push("剛剛 通過" + (c ? `（${c}）` : ""));
+        toast("已通過");
+      } else if (act === "reject") {
+        if (!c) { toast("退回請填意見"); return; }
+        it.status = "已退回";
+        it.history.push(`剛剛 退回（${c}）`);
+        toast("已退回");
+      } else if (act === "transfer") {
+        it.history.push("剛剛 轉簽（示範）");
+        toast("已轉簽（假）");
+      } else if (act === "withdraw") {
+        it.status = "草稿";
+        it.history.push("剛剛 撤回");
+        toast("已撤回成草稿");
+      }
+      render();
+    });
+
+    render();
+  </script>
+</body>
+</html>
