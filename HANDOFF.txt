@@ -15,7 +15,7 @@ Linux / macOS / Cloud Agent：
 URL：http://localhost:8098/
 
 立刻開網頁（jsDelivr，免設定）：
-  https://cdn.jsdelivr.net/gh/hyi61005-prog/LEARNING@cursor/system-shell-demo-f309/iis/index.html
+  https://cdn.jsdelivr.net/gh/hyi61005-prog/LEARNING@main/iis/index.html
   ui-brief：.../iis/ui-brief.html
 
 GitHub Pages（較短網址；需一次手動開 Source=GitHub Actions）：

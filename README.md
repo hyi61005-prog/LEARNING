@@ -6,18 +6,16 @@
 
 用 jsDelivr 直接開 GitHub 上的檔案：
 
-**https://cdn.jsdelivr.net/gh/hyi61005-prog/LEARNING@cursor/system-shell-demo-f309/iis/index.html**
+**https://cdn.jsdelivr.net/gh/hyi61005-prog/LEARNING@main/iis/index.html**
 
 | 頁面 | 連結 |
 |------|------|
-| 首頁 | https://cdn.jsdelivr.net/gh/hyi61005-prog/LEARNING@cursor/system-shell-demo-f309/iis/index.html |
-| ★畫面溝通板 | https://cdn.jsdelivr.net/gh/hyi61005-prog/LEARNING@cursor/system-shell-demo-f309/iis/ui-brief.html |
-| TABLE 驅動 | https://cdn.jsdelivr.net/gh/hyi61005-prog/LEARNING@cursor/system-shell-demo-f309/iis/table-sys.html |
-| 單據殼 | https://cdn.jsdelivr.net/gh/hyi61005-prog/LEARNING@cursor/system-shell-demo-f309/iis/doc.html |
-| 執行監控 | https://cdn.jsdelivr.net/gh/hyi61005-prog/LEARNING@cursor/system-shell-demo-f309/iis/exec.html |
-| 表單簽核 | https://cdn.jsdelivr.net/gh/hyi61005-prog/LEARNING@cursor/system-shell-demo-f309/iis/form.html |
-
-> 合併進 `main` 後，可把網址裡的 `@cursor/system-shell-demo-f309` 改成 `@main`。
+| 首頁 | https://cdn.jsdelivr.net/gh/hyi61005-prog/LEARNING@main/iis/index.html |
+| ★畫面溝通板 | https://cdn.jsdelivr.net/gh/hyi61005-prog/LEARNING@main/iis/ui-brief.html |
+| TABLE 驅動 | https://cdn.jsdelivr.net/gh/hyi61005-prog/LEARNING@main/iis/table-sys.html |
+| 單據殼 | https://cdn.jsdelivr.net/gh/hyi61005-prog/LEARNING@main/iis/doc.html |
+| 執行監控 | https://cdn.jsdelivr.net/gh/hyi61005-prog/LEARNING@main/iis/exec.html |
+| 表單簽核 | https://cdn.jsdelivr.net/gh/hyi61005-prog/LEARNING@main/iis/form.html |
 
 ## GitHub Pages（較短網址，需一次設定）
 
