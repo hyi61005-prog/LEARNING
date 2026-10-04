@@ -72,3 +72,4 @@ B) FieldDef 畫面上可增刪客製欄
 C) 報表殼：條件→結果表→匯出
 D) 持久化：localStorage 或單一 JSON／SQLite
 E) 繼續打磨 ui-brief
+# pages redeploy 2026-10-04T16:24:17Z
