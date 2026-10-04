@@ -14,6 +14,11 @@ Linux / macOS / Cloud Agent：
 
 URL：http://localhost:8098/
 
+GitHub Pages（部署後直接開網頁）：
+  https://hyi61005-prog.github.io/LEARNING/
+  第一次：Repo Settings → Pages → Source 選 GitHub Actions
+  workflow：.github/workflows/pages.yml（發佈 iis/）
+
 ════════════════════════════════
 頁面
 ════════════════════════════════
