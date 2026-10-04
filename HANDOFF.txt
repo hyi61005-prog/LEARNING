@@ -14,10 +14,14 @@ Linux / macOS / Cloud Agent：
 
 URL：http://localhost:8098/
 
-GitHub Pages（部署後直接開網頁）：
+立刻開網頁（jsDelivr，免設定）：
+  https://cdn.jsdelivr.net/gh/hyi61005-prog/LEARNING@cursor/system-shell-demo-f309/iis/index.html
+  ui-brief：.../iis/ui-brief.html
+
+GitHub Pages（較短網址；需一次手動開 Source=GitHub Actions）：
   https://hyi61005-prog.github.io/LEARNING/
-  第一次：Repo Settings → Pages → Source 選 GitHub Actions
   workflow：.github/workflows/pages.yml（發佈 iis/）
+  ※ Actions token 無法代開 Pages，需在 Settings 點一次
 
 ════════════════════════════════
 頁面

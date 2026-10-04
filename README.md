@@ -1,52 +1,45 @@
 # 系統殼範本（LEARNING）
 
-內網工具感的本機／GitHub Pages demo：用 TABLE 驅動做出可點的殼，並用畫面溝通板快速跟 AI 說畫面。
+內網工具感的 demo：TABLE 驅動可點殼 ＋ 畫面溝通板（跟 AI 說畫面）。假資料。
 
-## 直接開網頁（GitHub Pages）
+## 立刻開網頁（不用設定）
 
-網址（部署後）：
+用 jsDelivr 直接開 GitHub 上的檔案：
 
-**https://hyi61005-prog.github.io/LEARNING/**
+**https://cdn.jsdelivr.net/gh/hyi61005-prog/LEARNING@cursor/system-shell-demo-f309/iis/index.html**
 
-### 第一次要開一次設定（約 30 秒）
-
-1. 合併 PR 到 `main`（或先用目前分支也會觸發 workflow）
-2. 開：https://github.com/hyi61005-prog/LEARNING/settings/pages
-3. **Build and deployment → Source** 選 **GitHub Actions**
-4. 等 Actions 跑完（綠色），再開上面網址
-
-常用頁：
-
-| 頁面 | 網址 |
+| 頁面 | 連結 |
 |------|------|
-| 首頁 | https://hyi61005-prog.github.io/LEARNING/ |
-| 畫面溝通板 | https://hyi61005-prog.github.io/LEARNING/ui-brief.html |
-| TABLE 驅動 | https://hyi61005-prog.github.io/LEARNING/table-sys.html |
-| 單據殼 | https://hyi61005-prog.github.io/LEARNING/doc.html |
-| 執行監控 | https://hyi61005-prog.github.io/LEARNING/exec.html |
-| 表單簽核 | https://hyi61005-prog.github.io/LEARNING/form.html |
+| 首頁 | https://cdn.jsdelivr.net/gh/hyi61005-prog/LEARNING@cursor/system-shell-demo-f309/iis/index.html |
+| ★畫面溝通板 | https://cdn.jsdelivr.net/gh/hyi61005-prog/LEARNING@cursor/system-shell-demo-f309/iis/ui-brief.html |
+| TABLE 驅動 | https://cdn.jsdelivr.net/gh/hyi61005-prog/LEARNING@cursor/system-shell-demo-f309/iis/table-sys.html |
+| 單據殼 | https://cdn.jsdelivr.net/gh/hyi61005-prog/LEARNING@cursor/system-shell-demo-f309/iis/doc.html |
+| 執行監控 | https://cdn.jsdelivr.net/gh/hyi61005-prog/LEARNING@cursor/system-shell-demo-f309/iis/exec.html |
+| 表單簽核 | https://cdn.jsdelivr.net/gh/hyi61005-prog/LEARNING@cursor/system-shell-demo-f309/iis/form.html |
+
+> 合併進 `main` 後，可把網址裡的 `@cursor/system-shell-demo-f309` 改成 `@main`。
+
+## GitHub Pages（較短網址，需一次設定）
+
+目標：https://hyi61005-prog.github.io/LEARNING/
+
+1. 合併 [PR #1](https://github.com/hyi61005-prog/LEARNING/pull/1)
+2. 開 https://github.com/hyi61005-prog/LEARNING/settings/pages  
+   → **Source** 選 **GitHub Actions**
+3. 到 Actions 重跑 **Deploy GitHub Pages**（或再 push 一次）
 
 ## 本機開站（可選）
 
 ```powershell
-# Windows
 .\Start-LocalSite.ps1 -Port 8098
 ```
 
 ```bash
-# Linux / macOS
-chmod +x Start-LocalSite.sh
 ./Start-LocalSite.sh 8098
 ```
 
 本機：http://localhost:8098/
 
-## 產品共識（摘要）
-
-- 表單／單據／執行本質相同：提出→等待→通過或失敗→結束
-- SAP 味＝多張關聯 TABLE
-- 過帳／權限／稽核都用表解（見 `HANDOFF.txt`）
-
 ## 約束
 
-假資料；不連公司內網／正式庫／SAP；不寫對外信。
+假資料；不連公司內網／正式庫／SAP；不寫對外信。詳見 `HANDOFF.txt`。

@@ -22,10 +22,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # Pages 需在 Repo Settings → Pages → Source=GitHub Actions 手動開一次
+      # （GITHUB_TOKEN 無權代開：Resource not accessible by integration）
       - name: Setup Pages
         uses: actions/configure-pages@v5
-        with:
-          enablement: true
       - name: Upload iis/ as site root
         uses: actions/upload-pages-artifact@v3
         with:
