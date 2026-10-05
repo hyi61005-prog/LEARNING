@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>英文｜多益練習</title>
+  <link rel="stylesheet" href="site.css" />
+  <style>
+    .deck-row { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; }
+    .q-box { font-size:16px; line-height:1.55; margin:0 0 14px; white-space:pre-wrap; }
+    .choice {
+      display:block; width:100%; text-align:left; margin:0 0 8px;
+      padding:12px 14px; background:#fff; color:var(--ink);
+      border:1px solid #c8c6c4; border-radius:var(--radius);
+    }
+    .choice:hover { border-color:var(--primary); background:#f8fafc; }
+    .choice.ok { border-color:var(--ok); background:#dff6dd; }
+    .choice.bad { border-color:var(--err); background:#fde7e9; }
+    .choice:disabled { cursor:default; opacity:1; }
+    .meta-line { color:var(--muted); font-size:12px; margin-bottom:8px; }
+    .why { margin-top:10px; padding:10px; background:#e8f1f8; border-radius:var(--radius); }
+    .score { font-weight:600; color:var(--primary); }
+    @media (max-width:600px) {
+      .q-box { font-size:15px; }
+      .choice { padding:14px 12px; font-size:15px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="app-bar">
+    <div class="brand">英文練習</div>
+    <nav>
+      <a href="index.html">首頁</a>
+      <a class="active" href="english.html">多益</a>
+      <a href="ui-brief.html">畫面溝通板</a>
+    </nav>
+    <div class="tag">一次一題 · 手機友善</div>
+  </header>
+
+  <main class="wrap">
+    <h1 class="page-title">多益練習｜Ticket 英文</h1>
+    <p class="page-sub">目標 900+。現況約 600–700。知識庫：<code>kb/english/</code>（手機 Cursor 可讀）。</p>
+
+    <div class="panel">
+      <h2>題庫</h2>
+      <div id="decks" class="deck-row"></div>
+      <p class="note">建議順序：時態 → 固定搭配 → 自然回信 → 進度信閱讀</p>
+    </div>
+
+    <div class="panel" id="quiz-panel">
+      <div class="meta-line"><span id="progress">選一個題庫開始</span> · <span class="score" id="score"></span></div>
+      <div id="question" class="q-box">先點上面的題庫。</div>
+      <div id="choices"></div>
+      <div id="why" class="why" hidden></div>
+      <div class="btn-row" style="margin-top:12px">
+        <button type="button" class="secondary" id="btn-next" disabled>下一題</button>
+        <button type="button" class="secondary" id="btn-restart" disabled>重練本庫</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>手機 Cursor 口令</h2>
+      <pre class="prompt-box" id="prompt">當翻譯官。讀 kb/english/INDEX.md。
+依我的弱點（時態／搭配／自然回信）一次出一題。
+我答字母後先判對錯，再下一題。不要一次出整卷。</pre>
+      <div class="btn-row" style="margin-top:8px">
+        <button type="button" id="btn-copy">複製口令</button>
+      </div>
+    </div>
+  </main>
+
+  <div class="toast" id="toast"></div>
+  <script>
+  (function () {
+    var state = { deckId: null, idx: 0, answered: false, correct: 0, total: 0, data: null };
+    var el = {
+      decks: document.getElementById("decks"),
+      progress: document.getElementById("progress"),
+      score: document.getElementById("score"),
+      question: document.getElementById("question"),
+      choices: document.getElementById("choices"),
+      why: document.getElementById("why"),
+      next: document.getElementById("btn-next"),
+      restart: document.getElementById("btn-restart"),
+      toast: document.getElementById("toast")
+    };
+
+    function toast(msg) {
+      el.toast.textContent = msg;
+      el.toast.classList.add("show");
+      setTimeout(function () { el.toast.classList.remove("show"); }, 1600);
+    }
+
+    function currentDeck() {
+      if (!state.data) return null;
+      for (var i = 0; i < state.data.decks.length; i++) {
+        if (state.data.decks[i].id === state.deckId) return state.data.decks[i];
+      }
+      return null;
+    }
+
+    function renderDecks() {
+      el.decks.innerHTML = "";
+      state.data.decks.forEach(function (d) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "chip" + (state.deckId === d.id ? " active" : "");
+        b.textContent = d.title + " (" + d.items.length + ")";
+        b.onclick = function () { startDeck(d.id); };
+        el.decks.appendChild(b);
+      });
+    }
+
+    function startDeck(id) {
+      state.deckId = id;
+      state.idx = 0;
+      state.answered = false;
+      state.correct = 0;
+      state.total = 0;
+      el.restart.disabled = false;
+      renderDecks();
+      showItem();
+    }
+
+    function showItem() {
+      var deck = currentDeck();
+      if (!deck) return;
+      if (state.idx >= deck.items.length) {
+        el.progress.textContent = deck.title + " 完成";
+        el.question.textContent = "本庫結束。對 " + state.correct + " / " + state.total;
+        el.choices.innerHTML = "";
+        el.why.hidden = true;
+        el.next.disabled = true;
+        el.score.textContent = "";
+        return;
+      }
+      var item = deck.items[state.idx];
+      state.answered = false;
+      el.progress.textContent = deck.title + " · " + (state.idx + 1) + " / " + deck.items.length;
+      el.score.textContent = state.total ? ("累計 " + state.correct + "/" + state.total) : "";
+      el.question.textContent = item.q;
+      el.why.hidden = true;
+      el.next.disabled = true;
+      el.choices.innerHTML = "";
+      item.choices.forEach(function (text, i) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "choice";
+        b.textContent = String.fromCharCode(65 + i) + ") " + text;
+        b.onclick = function () { answer(i); };
+        el.choices.appendChild(b);
+      });
+    }
+
+    function answer(i) {
+      if (state.answered) return;
+      state.answered = true;
+      var item = currentDeck().items[state.idx];
+      state.total += 1;
+      var buttons = el.choices.querySelectorAll(".choice");
+      for (var n = 0; n < buttons.length; n++) {
+        buttons[n].disabled = true;
+        if (n === item.answer) buttons[n].classList.add("ok");
+        if (n === i && i !== item.answer) buttons[n].classList.add("bad");
+      }
+      if (i === item.answer) {
+        state.correct += 1;
+        toast("對");
+      } else {
+        toast("錯");
+      }
+      el.why.hidden = false;
+      el.why.textContent = item.why;
+      el.score.textContent = "累計 " + state.correct + "/" + state.total;
+      el.next.disabled = false;
+    }
+
+    el.next.onclick = function () {
+      state.idx += 1;
+      showItem();
+    };
+    el.restart.onclick = function () {
+      if (state.deckId) startDeck(state.deckId);
+    };
+    document.getElementById("btn-copy").onclick = function () {
+      var t = document.getElementById("prompt").textContent;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(t).then(function () { toast("已複製"); }).catch(function () { toast("請手動複製"); });
+      } else {
+        toast("請手動複製");
+      }
+    };
+
+    fetch("kb/english-drills.json?v=1")
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        state.data = data;
+        renderDecks();
+      })
+      .catch(function () {
+        el.question.textContent = "題庫載入失敗。請確認 kb/english-drills.json 已上線。";
+      });
+  })();
+  </script>
+</body>
+</html>

@@ -41,3 +41,11 @@
 ## 約束
 
 假資料；不連公司內網／正式庫／SAP；不寫對外信。詳見 `HANDOFF.txt`。
+
+## 英文／多益（2026-10-05）
+
+- 練習頁：https://hyi61005-prog.github.io/LEARNING/english.html
+- 知識庫（給手機 Cursor）：`kb/english/INDEX.md`
+- 題庫 JSON：`iis/kb/english-drills.json`
+
+定位約 600–700；弱點＝時態／固定搭配／自然回信。目標 900+。

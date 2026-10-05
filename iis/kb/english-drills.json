@@ -1,0 +1,126 @@
+{
+  "meta": {
+    "goal": "TOEIC 900+",
+    "band": "600-700",
+    "updated": "2026-10-05",
+    "mode": "one-at-a-time"
+  },
+  "decks": [
+    {
+      "id": "tense",
+      "title": "時態",
+      "items": [
+        {
+          "q": "Users reported that the reporting site ___ down since this morning.",
+          "choices": ["is", "has been", "was being", "had"],
+          "answer": 1,
+          "why": "since → 現在完成 has been"
+        },
+        {
+          "q": "We ___ the fix to the test server yesterday and are waiting for confirmation.",
+          "choices": ["deploy", "have deployed", "deployed", "are deploying"],
+          "answer": 2,
+          "why": "yesterday → 過去式 deployed"
+        },
+        {
+          "q": "The ticket ___ with Pavani for further investigation.",
+          "choices": ["remain", "remains", "is remain", "remaining"],
+          "answer": 1,
+          "why": "第三人稱單數 remains"
+        }
+      ]
+    },
+    {
+      "id": "collocation",
+      "title": "固定搭配",
+      "items": [
+        {
+          "q": "___ further notice, please use the old sold-to for returns.",
+          "choices": ["Until", "Unless", "By", "For"],
+          "answer": 0,
+          "why": "固定片語 Until further notice"
+        },
+        {
+          "q": "Could you share the exact issue details, replication steps, and ___ data?",
+          "choices": ["test", "testing", "tested", "tests"],
+          "answer": 0,
+          "why": "test data（名詞當修飾）"
+        },
+        {
+          "q": "Can you check whether the issue ___ on your side as well?",
+          "choices": ["reproduces", "is reproduce", "reproducing", "has reproduce"],
+          "answer": 0,
+          "why": "The issue reproduces"
+        },
+        {
+          "q": "Please ___ me know once the partner profile has been created.",
+          "choices": ["let", "make", "get", "have"],
+          "answer": 0,
+          "why": "let me know"
+        },
+        {
+          "q": "On my side I get an error saying the server was unable to ___ the request.",
+          "choices": ["complete", "completed", "completing", "be complete"],
+          "answer": 0,
+          "why": "unable to + 原形"
+        }
+      ]
+    },
+    {
+      "id": "natural",
+      "title": "自然回信",
+      "items": [
+        {
+          "q": "「客戶已是 ACTIVE，但 SAP 沒有 partner profile」最自然的是？",
+          "choices": [
+            "I saw the customer is ACTIVE, but SAP don't have partner profile.",
+            "I can see the customer is already ACTIVE, but SAP does not have a partner profile for this store.",
+            "Customer ACTIVE already, however partner profile missing in SAP side.",
+            "The customer has been seeing ACTIVE, but partner profile is not existing."
+          ],
+          "answer": 1,
+          "why": "完整主詞動詞；does not；有冠詞"
+        },
+        {
+          "q": "「修好前請先用舊店 sold-to」最自然的是？",
+          "choices": [
+            "Before this, please first use old store sold-to.",
+            "Until this is fixed, please use the old store’s sold-to for now.",
+            "Previously please using the old sold-to.",
+            "In advance, kindly utilize sold-to of former store."
+          ],
+          "answer": 1,
+          "why": "Until this is fixed … for now"
+        }
+      ]
+    },
+    {
+      "id": "reading",
+      "title": "進度信閱讀",
+      "items": [
+        {
+          "q": "短文：Got it. Update on IM…: still Work In Progress with Pavani. → 主要目的？",
+          "choices": [
+            "請立刻重開 ticket",
+            "回報進度：單還在 Pavani",
+            "說明已修好可結案",
+            "要求提供 SQL 結果"
+          ],
+          "answer": 1,
+          "why": "still WIP with Pavani＝進度回報"
+        },
+        {
+          "q": "It was acknowledged the same night. 的 It 最可能指？",
+          "choices": [
+            "The test data",
+            "The GSM website",
+            "The request / ticket sent back with those asks",
+            "Alan’s email"
+          ],
+          "answer": 2,
+          "why": "承接上一句 sent it back / asked for…"
+        }
+      ]
+    }
+  ]
+}
