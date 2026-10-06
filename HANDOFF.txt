@@ -26,6 +26,7 @@ GitHub Pages（較短網址；需一次手動開 Source=GitHub Actions）：
 ════════════════════════════════
 頁面
 ════════════════════════════════
+/story.html    故事單字片語（一句英一句中・點選；kb/english-story.json）
 /english.html  英文／多益練習（kb/english/）
 /                 首頁
 /ui-brief.html    ★畫面溝通板（跟 AI 說畫面）
