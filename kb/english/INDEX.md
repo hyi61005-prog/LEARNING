@@ -12,7 +12,9 @@
 ## 怎麼學（手機 Cursor）
 
 1. 開這個 repo，對 AI 說：`讀 kb/english/INDEX.md，一次一題練我`
-2. 或開網頁：[/english.html](../iis/english.html)（GitHub Pages）
+2. 或開網頁：
+   - [故事單字（點選）](../iis/story.html)｜一句英一句中＋單字／片語刷
+   - [多益選擇題](../iis/english.html)
 3. 答完不要急著看下一題，先講為什麼錯
 
 ## 知識頁

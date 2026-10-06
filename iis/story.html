@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>英文｜故事單字片語</title>
+  <link rel="stylesheet" href="site.css" />
+  <style>
+    .story-row { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
+    .mode-row { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; }
+    .mode-row .chip.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+    .pair { margin:0 0 14px; }
+    .en-line {
+      font-size:20px; line-height:1.5; margin:0 0 10px; color:var(--ink);
+      font-weight:600;
+    }
+    .zh-line {
+      font-size:17px; line-height:1.5; margin:0; color:var(--primary);
+      padding:10px 12px; background:#e8f1f8; border-radius:var(--radius);
+    }
+    .zh-line.hidden-zh { color:transparent; user-select:none; }
+    .zh-line.hidden-zh::after {
+      content:"點這裡顯示中文";
+      color:var(--muted); font-weight:400; font-size:15px;
+    }
+    .tap-card {
+      display:block; width:100%; text-align:left; margin:0 0 8px;
+      padding:14px 14px; background:#fff; color:var(--ink);
+      border:1px solid #c8c6c4; border-radius:var(--radius);
+      font-size:16px;
+    }
+    .tap-card:hover { border-color:var(--primary); background:#f8fafc; }
+    .tap-card.ok { border-color:var(--ok); background:#dff6dd; }
+    .tap-card.bad { border-color:var(--err); background:#fde7e9; }
+    .tap-card:disabled { cursor:default; opacity:1; }
+    .prompt-en {
+      font-size:28px; font-weight:700; color:var(--primary);
+      margin:4px 0 8px; word-break:break-word;
+    }
+    .prompt-zh {
+      font-size:22px; font-weight:700; color:var(--ink);
+      margin:4px 0 8px;
+    }
+    .hint { color:var(--muted); font-size:13px; margin:0 0 12px; }
+    .meta-line { color:var(--muted); font-size:12px; margin-bottom:8px; }
+    .why { margin-top:10px; padding:10px; background:#e8f1f8; border-radius:var(--radius); }
+    .score { font-weight:600; color:var(--primary); }
+    .big-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+    .big-actions button { min-height:44px; flex:1 1 120px; }
+    .progress-bar {
+      height:6px; background:#e1dfdd; border-radius:3px; overflow:hidden; margin:8px 0 14px;
+    }
+    .progress-bar > span {
+      display:block; height:100%; background:var(--primary); width:0%; transition:width .2s;
+    }
+    .empty-msg { color:var(--muted); }
+    @media (max-width:600px) {
+      .en-line { font-size:18px; }
+      .zh-line { font-size:16px; }
+      .prompt-en { font-size:24px; }
+      .prompt-zh { font-size:20px; }
+      .tap-card { padding:16px 12px; font-size:15px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="app-bar">
+    <div class="brand">故事練字</div>
+    <nav>
+      <a href="index.html">首頁</a>
+      <a href="english.html">多益</a>
+      <a class="active" href="story.html">故事單字</a>
+      <a href="ui-brief.html">畫面溝通板</a>
+    </nav>
+    <div class="tag">一句英一句中 · 只點選</div>
+  </header>
+
+  <main class="wrap">
+    <h1 class="page-title">故事｜單字／片語點選練</h1>
+    <p class="page-sub">先讀故事（英→中），再大量刷單字與片語。全程點選，不用打字。</p>
+
+    <div class="panel">
+      <h2>選故事</h2>
+      <div id="stories" class="story-row"></div>
+    </div>
+
+    <div class="panel">
+      <h2>模式</h2>
+      <div id="modes" class="mode-row">
+        <button type="button" class="chip active" data-mode="read">讀故事</button>
+        <button type="button" class="chip" data-mode="vocab">練單字</button>
+        <button type="button" class="chip" data-mode="phrase">練片語</button>
+        <button type="button" class="chip" data-mode="mix">全部混刷</button>
+      </div>
+      <p class="note">建議：讀完一篇 → 練單字 → 練片語 → 混刷</p>
+    </div>
+
+    <div class="panel" id="play-panel">
+      <div class="meta-line">
+        <span id="progress">先選一個故事</span>
+        · <span class="score" id="score"></span>
+      </div>
+      <div class="progress-bar"><span id="bar"></span></div>
+      <div id="stage" class="empty-msg">點上方故事開始。</div>
+      <div id="choices"></div>
+      <div id="why" class="why" hidden></div>
+      <div class="big-actions">
+        <button type="button" class="secondary" id="btn-prev" disabled>上一句</button>
+        <button type="button" id="btn-reveal" disabled>顯示中文</button>
+        <button type="button" id="btn-next" disabled>下一句</button>
+        <button type="button" class="secondary" id="btn-restart" disabled>重來</button>
+      </div>
+    </div>
+  </main>
+
+  <div class="toast" id="toast"></div>
+  <script>
+  (function () {
+    var state = {
+      data: null,
+      storyId: null,
+      mode: "read",
+      idx: 0,
+      answered: false,
+      correct: 0,
+      total: 0,
+      queue: [],
+      zhShown: false
+    };
+
+    var el = {
+      stories: document.getElementById("stories"),
+      progress: document.getElementById("progress"),
+      score: document.getElementById("score"),
+      bar: document.getElementById("bar"),
+      stage: document.getElementById("stage"),
+      choices: document.getElementById("choices"),
+      why: document.getElementById("why"),
+      prev: document.getElementById("btn-prev"),
+      reveal: document.getElementById("btn-reveal"),
+      next: document.getElementById("btn-next"),
+      restart: document.getElementById("btn-restart"),
+      toast: document.getElementById("toast")
+    };
+
+    function toast(msg) {
+      el.toast.textContent = msg;
+      el.toast.classList.add("show");
+      setTimeout(function () { el.toast.classList.remove("show"); }, 1400);
+    }
+
+    function currentStory() {
+      if (!state.data) return null;
+      for (var i = 0; i < state.data.stories.length; i++) {
+        if (state.data.stories[i].id === state.storyId) return state.data.stories[i];
+      }
+      return null;
+    }
+
+    function shuffle(arr) {
+      var a = arr.slice();
+      for (var i = a.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var t = a[i]; a[i] = a[j]; a[j] = t;
+      }
+      return a;
+    }
+
+    function pickDistractors(pool, answerZh, n) {
+      var others = [];
+      for (var i = 0; i < pool.length; i++) {
+        if (pool[i].zh !== answerZh) others.push(pool[i].zh);
+      }
+      others = shuffle(others);
+      return others.slice(0, n);
+    }
+
+    function buildQuizQueue(kind) {
+      var story = currentStory();
+      if (!story) return [];
+      var source = [];
+      if (kind === "vocab") source = story.vocab;
+      else if (kind === "phrase") source = story.phrases;
+      else source = story.vocab.concat(story.phrases);
+
+      var pool = source;
+      var items = shuffle(source).map(function (item) {
+        var distractors = pickDistractors(pool, item.zh, 3);
+        while (distractors.length < 3) distractors.push("（略）");
+        var choices = shuffle([item.zh].concat(distractors));
+        return {
+          kind: kind,
+          prompt: item.en,
+          answer: item.zh,
+          hint: item.hint || "",
+          choices: choices
+        };
+      });
+      return items;
+    }
+
+    function setBar(cur, total) {
+      var pct = total ? Math.round((cur / total) * 100) : 0;
+      el.bar.style.width = pct + "%";
+    }
+
+    function setReadButtons() {
+      var story = currentStory();
+      var n = story ? story.lines.length : 0;
+      el.prev.disabled = !(state.mode === "read" && state.idx > 0);
+      el.reveal.disabled = !(state.mode === "read" && story && state.idx < n);
+      el.next.disabled = !(state.mode === "read" && story && state.idx < n);
+      el.restart.disabled = !state.storyId;
+      el.reveal.textContent = state.zhShown ? "隱藏中文" : "顯示中文";
+      if (state.mode !== "read") {
+        el.prev.disabled = true;
+        el.reveal.disabled = true;
+        el.next.disabled = state.queue.length === 0 || !state.answered;
+        if (state.idx >= state.queue.length && state.queue.length) el.next.disabled = true;
+      }
+    }
+
+    function renderStories() {
+      el.stories.innerHTML = "";
+      state.data.stories.forEach(function (s) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "chip" + (state.storyId === s.id ? " active" : "");
+        var count = s.vocab.length + s.phrases.length;
+        b.textContent = s.title + " · " + count + "詞";
+        b.onclick = function () { startStory(s.id); };
+        el.stories.appendChild(b);
+      });
+    }
+
+    function renderModes() {
+      var chips = document.querySelectorAll("#modes .chip");
+      for (var i = 0; i < chips.length; i++) {
+        var c = chips[i];
+        c.className = "chip" + (c.getAttribute("data-mode") === state.mode ? " active" : "");
+      }
+    }
+
+    function startStory(id) {
+      state.storyId = id;
+      state.idx = 0;
+      state.answered = false;
+      state.correct = 0;
+      state.total = 0;
+      state.zhShown = false;
+      state.queue = [];
+      renderStories();
+      if (state.mode === "read") showRead();
+      else startQuizMode(state.mode);
+    }
+
+    function startQuizMode(mode) {
+      state.mode = mode;
+      state.idx = 0;
+      state.answered = false;
+      state.correct = 0;
+      state.total = 0;
+      state.queue = buildQuizQueue(mode === "mix" ? "mix" : mode);
+      renderModes();
+      showQuiz();
+    }
+
+    function showRead() {
+      var story = currentStory();
+      el.choices.innerHTML = "";
+      el.why.hidden = true;
+      el.score.textContent = "";
+      if (!story) {
+        el.stage.innerHTML = "<p class=\"empty-msg\">先選一個故事。</p>";
+        setBar(0, 0);
+        setReadButtons();
+        return;
+      }
+      if (state.idx >= story.lines.length) {
+        el.progress.textContent = story.title + " · 故事讀完";
+        el.stage.innerHTML =
+          "<p class=\"en-line\">讀完了。</p>" +
+          "<p class=\"zh-line\">接下來點「練單字」或「練片語」大量刷。</p>";
+        setBar(story.lines.length, story.lines.length);
+        setReadButtons();
+        el.next.disabled = true;
+        el.reveal.disabled = true;
+        return;
+      }
+      var line = story.lines[state.idx];
+      el.progress.textContent = story.title + " · 第 " + (state.idx + 1) + " / " + story.lines.length + " 句";
+      setBar(state.idx + 1, story.lines.length);
+      var zhClass = state.zhShown ? "zh-line" : "zh-line hidden-zh";
+      el.stage.innerHTML =
+        "<div class=\"pair\">" +
+        "<p class=\"en-line\"></p>" +
+        "<button type=\"button\" class=\"" + zhClass + "\" id=\"zh-tap\"></button>" +
+        "</div>";
+      el.stage.querySelector(".en-line").textContent = line.en;
+      var zhBtn = document.getElementById("zh-tap");
+      zhBtn.textContent = state.zhShown ? line.zh : "";
+      zhBtn.onclick = function () {
+        state.zhShown = !state.zhShown;
+        showRead();
+      };
+      setReadButtons();
+    }
+
+    function showQuiz() {
+      el.choices.innerHTML = "";
+      el.why.hidden = true;
+      var story = currentStory();
+      if (!story) {
+        el.stage.innerHTML = "<p class=\"empty-msg\">先選一個故事。</p>";
+        setBar(0, 0);
+        setReadButtons();
+        return;
+      }
+      if (!state.queue.length) {
+        el.stage.innerHTML = "<p class=\"empty-msg\">此模式沒有題目。</p>";
+        setReadButtons();
+        return;
+      }
+      if (state.idx >= state.queue.length) {
+        el.progress.textContent = story.title + " · 刷完了";
+        el.stage.innerHTML =
+          "<p class=\"en-line\">本輪結束</p>" +
+          "<p class=\"zh-line\">對 " + state.correct + " / " + state.total + "。可點「重來」或換模式。</p>";
+        el.score.textContent = "累計 " + state.correct + "/" + state.total;
+        setBar(state.queue.length, state.queue.length);
+        setReadButtons();
+        return;
+      }
+
+      var item = state.queue[state.idx];
+      state.answered = false;
+      var label = state.mode === "phrase" ? "片語" : (state.mode === "vocab" ? "單字" : "混刷");
+      el.progress.textContent = story.title + " · " + label + " " + (state.idx + 1) + " / " + state.queue.length;
+      el.score.textContent = state.total ? ("累計 " + state.correct + "/" + state.total) : "";
+      setBar(state.idx, state.queue.length);
+
+      var isEnPrompt = true;
+      el.stage.innerHTML =
+        "<p class=\"hint\">點正確的中文意思</p>" +
+        "<div class=\"" + (isEnPrompt ? "prompt-en" : "prompt-zh") + "\"></div>" +
+        (item.hint ? "<p class=\"hint\"></p>" : "");
+      el.stage.querySelector(isEnPrompt ? ".prompt-en" : ".prompt-zh").textContent = item.prompt;
+      if (item.hint) {
+        var hints = el.stage.querySelectorAll(".hint");
+        hints[hints.length - 1].textContent = "例句／提示：" + item.hint;
+      }
+
+      item.choices.forEach(function (text) {
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "tap-card";
+        b.textContent = text;
+        b.onclick = function () { answerQuiz(text); };
+        el.choices.appendChild(b);
+      });
+      setReadButtons();
+    }
+
+    function answerQuiz(choice) {
+      if (state.answered) return;
+      state.answered = true;
+      var item = state.queue[state.idx];
+      state.total += 1;
+      var buttons = el.choices.querySelectorAll(".tap-card");
+      for (var i = 0; i < buttons.length; i++) {
+        buttons[i].disabled = true;
+        if (buttons[i].textContent === item.answer) buttons[i].classList.add("ok");
+        if (buttons[i].textContent === choice && choice !== item.answer) buttons[i].classList.add("bad");
+      }
+      if (choice === item.answer) {
+        state.correct += 1;
+        toast("對");
+      } else {
+        toast("錯");
+      }
+      el.why.hidden = false;
+      el.why.textContent = item.prompt + " ＝ " + item.answer + (item.hint ? "　｜　" + item.hint : "");
+      el.score.textContent = "累計 " + state.correct + "/" + state.total;
+      setBar(state.idx + 1, state.queue.length);
+      setReadButtons();
+    }
+
+    function showCurrent() {
+      if (state.mode === "read") showRead();
+      else showQuiz();
+    }
+
+    document.querySelectorAll("#modes .chip").forEach(function (chip) {
+      chip.onclick = function () {
+        var mode = chip.getAttribute("data-mode");
+        state.mode = mode;
+        renderModes();
+        if (!state.storyId) {
+          el.stage.innerHTML = "<p class=\"empty-msg\">先選一個故事。</p>";
+          return;
+        }
+        if (mode === "read") {
+          state.idx = 0;
+          state.zhShown = false;
+          showRead();
+        } else {
+          startQuizMode(mode);
+        }
+      };
+    });
+
+    el.prev.onclick = function () {
+      if (state.mode !== "read" || state.idx <= 0) return;
+      state.idx -= 1;
+      state.zhShown = false;
+      showRead();
+    };
+    el.reveal.onclick = function () {
+      if (state.mode !== "read") return;
+      state.zhShown = !state.zhShown;
+      showRead();
+    };
+    el.next.onclick = function () {
+      if (state.mode === "read") {
+        var story = currentStory();
+        if (!story) return;
+        if (!state.zhShown && state.idx < story.lines.length) {
+          state.zhShown = true;
+          showRead();
+          return;
+        }
+        state.idx += 1;
+        state.zhShown = false;
+        showRead();
+        return;
+      }
+      if (!state.answered) return;
+      state.idx += 1;
+      showQuiz();
+    };
+    el.restart.onclick = function () {
+      if (!state.storyId) return;
+      if (state.mode === "read") {
+        state.idx = 0;
+        state.zhShown = false;
+        showRead();
+      } else {
+        startQuizMode(state.mode);
+      }
+    };
+
+    fetch("kb/english-story.json?v=1")
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        state.data = data;
+        renderStories();
+      })
+      .catch(function () {
+        el.stage.textContent = "故事載入失敗。請確認 kb/english-story.json 已上線。";
+      });
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,163 @@
+{
+  "meta": {
+    "title": "英中故事｜點選練單字片語",
+    "mode": "tap-only",
+    "updated": "2026-10-06",
+    "goal": "大量單字／片語，一句英一句中"
+  },
+  "stories": [
+    {
+      "id": "ticket-ghost",
+      "title": "凌晨的工單",
+      "tag": "懸疑＋Ticket",
+      "lines": [
+        { "en": "It was 2 a.m., and the ticket was still open.", "zh": "凌晨兩點，那張單還開著。" },
+        { "en": "The server had been quiet since midnight.", "zh": "伺服器從午夜起就一直很安靜。" },
+        { "en": "Then one line appeared on the screen: “I can hear you typing.”", "zh": "接著螢幕跳出一行字：「我聽得到你在打字。」" },
+        { "en": "He froze, fingers above the keyboard.", "zh": "他整個人僵住，手指停在鍵盤上方。" },
+        { "en": "Nobody else was supposed to be on the system.", "zh": "按理說，不該還有別人在這套系統裡。" },
+        { "en": "He typed back: “Who is this?”", "zh": "他回打：「你是誰？」" },
+        { "en": "The reply came in one second: “Your fix from yesterday. It never left.”", "zh": "一秒後回覆來了：「你昨天的那個修正。它一直沒離開。」" },
+        { "en": "He checked the logs. The deployment was marked complete.", "zh": "他查了 log。部署狀態顯示已完成。" },
+        { "en": "Still, the ticket remained with him for further investigation.", "zh": "可是這張單還停在他手上，要再查。" },
+        { "en": "On his side, the error was unable to complete the request.", "zh": "在他這邊，錯誤顯示無法完成請求。" },
+        { "en": "He sent an update: still work in progress.", "zh": "他發了進度：還在處理中。" },
+        { "en": "Until further notice, nobody else should touch the test server.", "zh": "在另行通知前，別人都不該動測站。" }
+      ],
+      "vocab": [
+        { "en": "ticket", "zh": "工單／單據", "hint": "The ticket was still open." },
+        { "en": "server", "zh": "伺服器", "hint": "The server had been quiet." },
+        { "en": "since", "zh": "自從……起", "hint": "quiet since midnight" },
+        { "en": "appear", "zh": "出現", "hint": "one line appeared" },
+        { "en": "freeze", "zh": "僵住、停住", "hint": "He froze." },
+        { "en": "keyboard", "zh": "鍵盤", "hint": "fingers above the keyboard" },
+        { "en": "supposed to", "zh": "應該、按理說該", "hint": "was supposed to be" },
+        { "en": "reply", "zh": "回覆", "hint": "The reply came in one second." },
+        { "en": "fix", "zh": "修正／修補", "hint": "Your fix from yesterday." },
+        { "en": "log", "zh": "日誌紀錄", "hint": "He checked the logs." },
+        { "en": "deployment", "zh": "部署、上線", "hint": "The deployment was marked complete." },
+        { "en": "complete", "zh": "完成的", "hint": "marked complete" },
+        { "en": "error", "zh": "錯誤訊息", "hint": "the error was…" },
+        { "en": "request", "zh": "請求", "hint": "complete the request" },
+        { "en": "update", "zh": "進度更新／最新消息", "hint": "He sent an update." },
+        { "en": "touch", "zh": "動到、碰", "hint": "should touch the test server" }
+      ],
+      "phrases": [
+        { "en": "had been quiet since…", "zh": "從……起一直很安靜", "hint": "since → 現在完成" },
+        { "en": "was supposed to", "zh": "按理說應該", "hint": "Nobody else was supposed to…" },
+        { "en": "typed back", "zh": "回打、回覆輸入", "hint": "He typed back…" },
+        { "en": "never left", "zh": "一直沒離開", "hint": "It never left." },
+        { "en": "remains with", "zh": "還在某人手上", "hint": "The ticket remained with him." },
+        { "en": "further investigation", "zh": "進一步調查", "hint": "for further investigation" },
+        { "en": "on my side / on his side", "zh": "在我／他這邊", "hint": "On his side…" },
+        { "en": "unable to complete", "zh": "無法完成", "hint": "unable to + 原形" },
+        { "en": "work in progress", "zh": "處理中／進行中", "hint": "still work in progress" },
+        { "en": "until further notice", "zh": "在另行通知前", "hint": "固定片語" },
+        { "en": "test server", "zh": "測試伺服器／測站", "hint": "名詞＋名詞" },
+        { "en": "from yesterday", "zh": "昨天的那個", "hint": "Your fix from yesterday." }
+      ]
+    },
+    {
+      "id": "partner-mail",
+      "title": "Partner Profile 回信",
+      "tag": "職場回信",
+      "lines": [
+        { "en": "Hi Alan,", "zh": "Alan 你好，" },
+        { "en": "Got it.", "zh": "收到。" },
+        { "en": "I can see the customer is already ACTIVE.", "zh": "我可以看到客戶狀態已經是 ACTIVE。" },
+        { "en": "But SAP does not have a partner profile for this store.", "zh": "但 SAP 沒有這家店的 partner profile。" },
+        { "en": "Could you share the exact issue details, replication steps, and test data?", "zh": "可以提供精確問題細節、重現步驟和測試資料嗎？" },
+        { "en": "Can you check whether the issue reproduces on your side as well?", "zh": "可以確認這個問題在你那邊是否也能重現嗎？" },
+        { "en": "Until this is fixed, please use the old store’s sold-to for now.", "zh": "修好前，請先暫時用舊店的 sold-to。" },
+        { "en": "Please let me know once the partner profile has been created.", "zh": "partner profile 建好後請告訴我。" },
+        { "en": "Update on IM-2041: still Work In Progress with Pavani.", "zh": "IM-2041 進度：還在 Pavani 處理中。" },
+        { "en": "It was acknowledged the same night.", "zh": "當天晚上就已確認收到。" },
+        { "en": "We deployed the fix to the test server yesterday and are waiting for confirmation.", "zh": "我們昨天已把修正部到測站，目前在等確認。" },
+        { "en": "Thank you", "zh": "謝謝" }
+      ],
+      "vocab": [
+        { "en": "customer", "zh": "客戶", "hint": "the customer is already ACTIVE" },
+        { "en": "already", "zh": "已經", "hint": "already ACTIVE" },
+        { "en": "store", "zh": "店家／門市", "hint": "for this store" },
+        { "en": "exact", "zh": "精確的", "hint": "exact issue details" },
+        { "en": "detail", "zh": "細節", "hint": "issue details" },
+        { "en": "share", "zh": "提供、分享", "hint": "Could you share…" },
+        { "en": "reproduce", "zh": "重現（bug）", "hint": "the issue reproduces" },
+        { "en": "fixed", "zh": "修好的", "hint": "Until this is fixed" },
+        { "en": "create", "zh": "建立", "hint": "has been created" },
+        { "en": "acknowledge", "zh": "確認收到／知悉", "hint": "It was acknowledged" },
+        { "en": "deploy", "zh": "部署", "hint": "We deployed the fix" },
+        { "en": "confirmation", "zh": "確認", "hint": "waiting for confirmation" },
+        { "en": "waiting", "zh": "等待中", "hint": "are waiting for…" },
+        { "en": "progress", "zh": "進度", "hint": "Work In Progress" },
+        { "en": "owner", "zh": "負責人（單的擁有者）", "hint": "with Pavani = owner" },
+        { "en": "workaround", "zh": "暫行做法／變通", "hint": "use old sold-to = workaround" }
+      ],
+      "phrases": [
+        { "en": "Got it.", "zh": "收到。", "hint": "開場一句話" },
+        { "en": "I can see…", "zh": "我可以看到……", "hint": "比 I saw 更自然" },
+        { "en": "partner profile", "zh": "合作夥伴設定檔（SAP）", "hint": "專有名詞照抄" },
+        { "en": "replication steps", "zh": "重現步驟", "hint": "ticket 常用" },
+        { "en": "test data", "zh": "測試資料", "hint": "不要寫 testing data" },
+        { "en": "the issue reproduces", "zh": "問題可以重現", "hint": "不要 is reproduce" },
+        { "en": "on your side as well", "zh": "在你那邊也一樣", "hint": "as well＝也" },
+        { "en": "Until this is fixed… for now", "zh": "修好前……先暫時", "hint": "暫行做法句型" },
+        { "en": "sold-to", "zh": "售達方代碼（SAP）", "hint": "old store’s sold-to" },
+        { "en": "let me know once…", "zh": "……一完成就告訴我", "hint": "Please let me know once…" },
+        { "en": "still Work In Progress with…", "zh": "還在某人處理中", "hint": "進度信" },
+        { "en": "waiting for confirmation", "zh": "等待確認", "hint": "deployed … and are waiting" }
+      ]
+    },
+    {
+      "id": "rain-train",
+      "title": "雨夜捷運",
+      "tag": "生活懸疑",
+      "lines": [
+        { "en": "The train doors closed before she could step in.", "zh": "她還沒踏進去，車門就關上了。" },
+        { "en": "Rain had been falling since early evening.", "zh": "雨從傍晚起就不停地下。" },
+        { "en": "She checked her phone for the next arrival.", "zh": "她看手機查下一班到站時間。" },
+        { "en": "A message popped up from an unknown number.", "zh": "一則來自未知號碼的訊息跳出來。" },
+        { "en": "“Don’t take the next train.”", "zh": "「別搭下一班車。」" },
+        { "en": "She looked around the empty platform.", "zh": "她環顧空蕩蕩的月台。" },
+        { "en": "Nobody else seemed to notice her.", "zh": "似乎沒有人注意到她。" },
+        { "en": "For now, she decided to stay put.", "zh": "她決定先暫時留在原地。" },
+        { "en": "Until she knew more, moving felt unsafe.", "zh": "在搞清楚之前，移動感覺不安全。" },
+        { "en": "Then the lights flickered once.", "zh": "接著燈閃了一下。" },
+        { "en": "Her phone buzzed again: “Good. Wait for my update.”", "zh": "手機又震動：「很好。等我的最新消息。」" },
+        { "en": "She let out a breath and replied, “Got it.”", "zh": "她吐了一口氣回：「收到。」" }
+      ],
+      "vocab": [
+        { "en": "train", "zh": "列車／捷運", "hint": "the next train" },
+        { "en": "door", "zh": "門", "hint": "train doors" },
+        { "en": "step in", "zh": "踏進去", "hint": "before she could step in" },
+        { "en": "rain", "zh": "雨", "hint": "Rain had been falling" },
+        { "en": "evening", "zh": "傍晚／晚上", "hint": "early evening" },
+        { "en": "arrival", "zh": "到站、抵達", "hint": "next arrival" },
+        { "en": "message", "zh": "訊息", "hint": "A message popped up" },
+        { "en": "unknown", "zh": "未知的", "hint": "unknown number" },
+        { "en": "platform", "zh": "月台", "hint": "empty platform" },
+        { "en": "empty", "zh": "空的", "hint": "empty platform" },
+        { "en": "notice", "zh": "注意到", "hint": "seemed to notice" },
+        { "en": "decide", "zh": "決定", "hint": "she decided to" },
+        { "en": "unsafe", "zh": "不安全的", "hint": "felt unsafe" },
+        { "en": "flicker", "zh": "閃爍", "hint": "lights flickered" },
+        { "en": "buzz", "zh": "震動／嗡嗡響", "hint": "phone buzzed" },
+        { "en": "breath", "zh": "一口氣、呼吸", "hint": "let out a breath" }
+      ],
+      "phrases": [
+        { "en": "before she could…", "zh": "她還沒來得及……", "hint": "doors closed before…" },
+        { "en": "had been falling since…", "zh": "從……起一直下著", "hint": "since → 完成式" },
+        { "en": "popped up", "zh": "跳出來、突然出現", "hint": "A message popped up" },
+        { "en": "looked around", "zh": "環顧四周", "hint": "She looked around" },
+        { "en": "seemed to", "zh": "似乎……", "hint": "seemed to notice" },
+        { "en": "for now", "zh": "目前、先暫時", "hint": "For now, she decided…" },
+        { "en": "stay put", "zh": "留在原地別動", "hint": "decided to stay put" },
+        { "en": "until she knew more", "zh": "在她知道更多之前", "hint": "Until…" },
+        { "en": "wait for my update", "zh": "等我的最新消息", "hint": "商務也能用 update" },
+        { "en": "let out a breath", "zh": "吐一口氣（鬆口氣）", "hint": "She let out a breath" },
+        { "en": "Got it.", "zh": "收到。", "hint": "回覆很短很常用" },
+        { "en": "Don’t take the next…", "zh": "別搭／別選下一個……", "hint": "祈使句" }
+      ]
+    }
+  ]
+}
