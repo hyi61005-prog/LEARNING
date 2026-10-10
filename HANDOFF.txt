@@ -34,6 +34,7 @@ GitHub Pages（較短網址；需一次手動開 Source=GitHub Actions）：
 /doc.html         單據殼（表頭＋明細＋過帳）
 /exec.html        執行監控殼
 /form.html        表單簽核殼
+/brake-pad.html   Tính bề rộng má phanh (áp suất phân bố đều)
 
 檔案：iis/* 、Start-LocalSite.ps1、Start-LocalSite.sh、HANDOFF.txt、README.md
 

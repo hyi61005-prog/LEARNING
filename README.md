@@ -16,6 +16,7 @@
 | 單據殼 | https://cdn.jsdelivr.net/gh/hyi61005-prog/LEARNING@main/iis/doc.html |
 | 執行監控 | https://cdn.jsdelivr.net/gh/hyi61005-prog/LEARNING@main/iis/exec.html |
 | 表單簽核 | https://cdn.jsdelivr.net/gh/hyi61005-prog/LEARNING@main/iis/form.html |
+| Má phanh (phân bố đều) | https://cdn.jsdelivr.net/gh/hyi61005-prog/LEARNING@main/iis/brake-pad.html |
 
 ## GitHub Pages（較短網址，需一次設定）
 

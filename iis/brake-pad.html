@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bề rộng má phanh｜phân bố đều</title>
+  <link rel="stylesheet" href="site.css" />
+  <style>
+    .formula {
+      background: #f8f7f6;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      overflow-x: auto;
+      white-space: pre-wrap;
+    }
+    .result-box {
+      background: #e8f2fb;
+      border: 1px solid #b8d4ea;
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      margin-top: 10px;
+    }
+    .result-box .big {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--primary);
+      margin: 4px 0 8px;
+    }
+    .result-box dl.kv { margin: 0; }
+    .warn-text { color: var(--warn); }
+    .ok-text { color: var(--ok); }
+    .mode-tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    .mode-tabs button {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      padding: 8px 12px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      font: inherit;
+    }
+    .mode-tabs button.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+      font-weight: 600;
+    }
+    .mode-panel { display: none; }
+    .mode-panel.active { display: block; }
+    .unit { color: var(--muted); font-size: 12px; margin-left: 4px; }
+  </style>
+</head>
+<body>
+  <header class="app-bar">
+    <div class="brand">系統殼範本</div>
+    <nav>
+      <a href="index.html">首頁</a>
+      <a class="active" href="brake-pad.html">Má phanh</a>
+      <a href="ui-brief.html">畫面溝通板</a>
+      <a href="table-sys.html">TABLE 驅動</a>
+    </nav>
+    <div class="tag">Quy luật phân bố đều</div>
+  </header>
+
+  <main class="wrap">
+    <h1 class="page-title">Tính bề rộng má phanh</h1>
+    <p class="page-sub">
+      Giả thiết <strong>áp suất phân bố đều</strong> trên bề mặt ma sát
+      (p = const). Phù hợp má mới / tiếp xúc tốt; khi mòn nhiều thường chuyển sang quy luật mòn đều.
+    </p>
+
+    <div class="panel">
+      <h2>Chọn kiểu má</h2>
+      <div class="mode-tabs" role="tablist">
+        <button type="button" class="active" data-mode="disc" role="tab">Phanh đĩa (vành khăn)</button>
+        <button type="button" data-mode="drum" role="tab">Guốc tang trống</button>
+        <button type="button" data-mode="rect" role="tab">Má chữ nhật (xấp xỉ)</button>
+      </div>
+
+      <!-- ===== DISC ===== -->
+      <div class="mode-panel active" id="panel-disc">
+        <p class="note" style="margin-top:0">
+          Diện tích vành: A = π(R₂² − R₁²) = Fₐ / p → suy ra bề rộng b = R₂ − R₁.
+        </p>
+        <div class="formula">p = Fₐ / [π(R₂² − R₁²)]
+Mₜ = (2/3)·μ·Fₐ·(R₂³ − R₁³)/(R₂² − R₁²)
+b = R₂ − R₁</div>
+        <div class="grid-3" style="margin-top:12px">
+          <label class="field">
+            <span>Lực ép dọc trục Fₐ <span class="unit">N</span></span>
+            <input type="number" id="d-Fa" value="4000" min="0" step="any" />
+          </label>
+          <label class="field">
+            <span>Áp suất cho phép [p] <span class="unit">MPa = N/mm²</span></span>
+            <input type="number" id="d-p" value="1.2" min="0" step="any" />
+          </label>
+          <label class="field">
+            <span>Hệ số ma sát μ <span class="unit">—</span></span>
+            <input type="number" id="d-mu" value="0.35" min="0" step="any" />
+          </label>
+          <label class="field">
+            <span>Bán kính ngoài R₂ <span class="unit">mm</span></span>
+            <input type="number" id="d-R2" value="140" min="0" step="any" />
+          </label>
+          <label class="field">
+            <span>Tỉ số k = R₁/R₂ <span class="unit">(0.5–0.7 thường dùng)</span></span>
+            <input type="number" id="d-k" value="0.65" min="0" max="0.99" step="any" />
+          </label>
+          <label class="field">
+            <span>Cách tính R₁</span>
+            <select id="d-mode">
+              <option value="fromP">Từ [p] và R₂ (khuyến nghị)</option>
+              <option value="fromK">Từ tỉ số k và R₂</option>
+            </select>
+          </label>
+        </div>
+        <div class="btn-row">
+          <button type="button" class="primary" id="btn-disc">Tính bề rộng b</button>
+        </div>
+        <div class="result-box" id="out-disc" hidden></div>
+      </div>
+
+      <!-- ===== DRUM ===== -->
+      <div class="mode-panel" id="panel-drum">
+        <p class="note" style="margin-top:0">
+          Áp suất đều trên cung má: A = b · r · θ → b = N / (p · r · θ).
+        </p>
+        <div class="formula">A = b · r · θ
+p = N / A  ⇒  b = N / (p · r · θ)
+(θ tính bằng radian; θ° = θ · 180/π)</div>
+        <div class="grid-3" style="margin-top:12px">
+          <label class="field">
+            <span>Tổng lực pháp tuyến N <span class="unit">N</span></span>
+            <input type="number" id="g-N" value="3500" min="0" step="any" />
+          </label>
+          <label class="field">
+            <span>Áp suất cho phép [p] <span class="unit">MPa</span></span>
+            <input type="number" id="g-p" value="1.0" min="0" step="any" />
+          </label>
+          <label class="field">
+            <span>Bán kính trong trống r <span class="unit">mm</span></span>
+            <input type="number" id="g-r" value="125" min="0" step="any" />
+          </label>
+          <label class="field">
+            <span>Góc ôm má θ <span class="unit">độ</span></span>
+            <input type="number" id="g-theta" value="110" min="0" max="180" step="any" />
+          </label>
+          <label class="field">
+            <span>Hệ số ma sát μ <span class="unit">(tuỳ chọn, kiểm tra Mₜ)</span></span>
+            <input type="number" id="g-mu" value="0.35" min="0" step="any" />
+          </label>
+        </div>
+        <div class="btn-row">
+          <button type="button" class="primary" id="btn-drum">Tính bề rộng b</button>
+        </div>
+        <div class="result-box" id="out-drum" hidden></div>
+      </div>
+
+      <!-- ===== RECT ===== -->
+      <div class="mode-panel" id="panel-rect">
+        <p class="note" style="margin-top:0">
+          Xấp xỉ má phẳng chữ nhật: A = b · L = Fₙ / p.
+        </p>
+        <div class="formula">A = b · L = Fₙ / [p]
+b = Fₙ / ([p] · L)</div>
+        <div class="grid-3" style="margin-top:12px">
+          <label class="field">
+            <span>Lực pháp tuyến Fₙ <span class="unit">N</span></span>
+            <input type="number" id="r-Fn" value="3000" min="0" step="any" />
+          </label>
+          <label class="field">
+            <span>Áp suất cho phép [p] <span class="unit">MPa</span></span>
+            <input type="number" id="r-p" value="1.5" min="0" step="any" />
+          </label>
+          <label class="field">
+            <span>Chiều dài má L <span class="unit">mm</span></span>
+            <input type="number" id="r-L" value="80" min="0" step="any" />
+          </label>
+        </div>
+        <div class="btn-row">
+          <button type="button" class="primary" id="btn-rect">Tính bề rộng b</button>
+        </div>
+        <div class="result-box" id="out-rect" hidden></div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="panel">
+        <h2>Giả thiết quy luật phân bố đều</h2>
+        <ul style="margin:0;padding-left:18px;color:var(--muted)">
+          <li>Áp suất pháp tuyến p không đổi trên toàn diện tích tiếp xúc.</li>
+          <li>Thường dùng khi má <em>mới</em>, cứng, biến dạng nhỏ, tiếp xúc tốt.</li>
+          <li>Mô men ma sát đĩa lớn hơn quy luật mòn đều (cùng Fₐ, R₁, R₂).</li>
+          <li>[p] lấy theo vật liệu má + đĩa/trống (thường 0.5–2.5 MPa cho má hữu cơ/bán kim).</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h2>Đơn vị &amp; lưu ý</h2>
+        <ul style="margin:0;padding-left:18px;color:var(--muted)">
+          <li>1 MPa = 1 N/mm².</li>
+          <li>Kết quả b nên làm tròn lên theo kích thước tiêu chuẩn / khuôn ép.</li>
+          <li>Cần kiểm tra thêm: nhiệt, mòn, hệ số an toàn phanh, cân bằng guốc leading/trailing.</li>
+          <li>Demo công thức — không thay thế tính toán phê duyệt sản xuất.</li>
+        </ul>
+      </div>
+    </div>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const toast = (msg) => {
+      const el = $("toast");
+      el.textContent = msg;
+      el.classList.add("show");
+      clearTimeout(toast._t);
+      toast._t = setTimeout(() => el.classList.remove("show"), 2200);
+    };
+    const fmt = (x, n = 2) => Number.isFinite(x) ? x.toFixed(n) : "—";
+
+    // tabs
+    document.querySelectorAll(".mode-tabs button").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".mode-tabs button").forEach((b) => b.classList.remove("active"));
+        document.querySelectorAll(".mode-panel").forEach((p) => p.classList.remove("active"));
+        btn.classList.add("active");
+        $("panel-" + btn.dataset.mode).classList.add("active");
+      });
+    });
+
+    function calcDisc() {
+      const Fa = +$("d-Fa").value;
+      const p = +$("d-p").value; // MPa = N/mm²
+      const mu = +$("d-mu").value;
+      const R2 = +$("d-R2").value;
+      const k = +$("d-k").value;
+      const mode = $("d-mode").value;
+
+      if (!(Fa > 0 && p > 0 && R2 > 0 && mu >= 0)) {
+        toast("Nhập Fa, [p], R₂ > 0");
+        return;
+      }
+
+      let R1, note;
+      if (mode === "fromK") {
+        if (!(k > 0 && k < 1)) {
+          toast("Tỉ số k phải trong (0, 1)");
+          return;
+        }
+        R1 = k * R2;
+        const A = Math.PI * (R2 * R2 - R1 * R1);
+        const pActual = Fa / A;
+        note = pActual > p
+          ? `<span class="warn-text">Áp suất thực ${fmt(pActual, 3)} MPa &gt; [p] = ${fmt(p, 3)} — cần tăng diện tích / giảm Fa.</span>`
+          : `<span class="ok-text">Áp suất thực ${fmt(pActual, 3)} MPa ≤ [p].</span>`;
+      } else {
+        // from allowable p: need A_min = Fa/p
+        const Aneed = Fa / p;
+        const Amax = Math.PI * R2 * R2;
+        if (Aneed >= Amax) {
+          $("out-disc").hidden = false;
+          $("out-disc").innerHTML = `<div class="warn-text">Cần A = ${fmt(Aneed, 1)} mm² nhưng πR₂² chỉ = ${fmt(Amax, 1)} mm². Tăng R₂ hoặc giảm Fa / tăng [p].</div>`;
+          return;
+        }
+        R1 = Math.sqrt(R2 * R2 - Aneed / Math.PI);
+        if (R1 <= 0) {
+          toast("R₁ không hợp lệ — kiểm tra đầu vào");
+          return;
+        }
+        note = `Chọn R₁ sao cho p ≈ [p]. Tỉ số k = R₁/R₂ = ${fmt(R1 / R2, 3)}.`;
+      }
+
+      const b = R2 - R1;
+      const A = Math.PI * (R2 * R2 - R1 * R1);
+      const pAct = Fa / A;
+      const Mt = (2 / 3) * mu * Fa * (Math.pow(R2, 3) - Math.pow(R1, 3)) / (R2 * R2 - R1 * R1);
+      // Mt in N·mm → N·m
+      const Mt_Nm = Mt / 1000;
+
+      $("out-disc").hidden = false;
+      $("out-disc").innerHTML = `
+        <div>Bề rộng má phanh</div>
+        <div class="big">b = ${fmt(b, 2)} mm</div>
+        <dl class="kv">
+          <div><dt>R₁</dt><dd>${fmt(R1, 2)} mm</dd></div>
+          <div><dt>R₂</dt><dd>${fmt(R2, 2)} mm</dd></div>
+          <div><dt>Diện tích A</dt><dd>${fmt(A, 1)} mm²</dd></div>
+          <div><dt>Áp suất p</dt><dd>${fmt(pAct, 3)} MPa</dd></div>
+          <div><dt>Mô men ma sát Mₜ</dt><dd>${fmt(Mt_Nm, 2)} N·m <span class="unit">(1 mặt)</span></dd></div>
+        </dl>
+        <p class="note" style="margin:10px 0 0">${note}</p>
+      `;
+    }
+
+    function calcDrum() {
+      const N = +$("g-N").value;
+      const p = +$("g-p").value;
+      const r = +$("g-r").value;
+      const thetaDeg = +$("g-theta").value;
+      const mu = +$("g-mu").value;
+
+      if (!(N > 0 && p > 0 && r > 0 && thetaDeg > 0)) {
+        toast("Nhập N, [p], r, θ > 0");
+        return;
+      }
+
+      const theta = thetaDeg * Math.PI / 180;
+      const b = N / (p * r * theta);
+      const A = b * r * theta;
+      // approximate friction force / moment about drum axis (uniform p, resultant at ~mid arc — rough)
+      const Mt_approx = mu * N * r / 1000; // N·m, simplified F_f = μN at radius r
+
+      $("out-drum").hidden = false;
+      $("out-drum").innerHTML = `
+        <div>Bề rộng má (guốc)</div>
+        <div class="big">b = ${fmt(b, 2)} mm</div>
+        <dl class="kv">
+          <div><dt>θ</dt><dd>${fmt(thetaDeg, 1)}° = ${fmt(theta, 4)} rad</dd></div>
+          <div><dt>Diện tích A</dt><dd>${fmt(A, 1)} mm²</dd></div>
+          <div><dt>Áp suất p</dt><dd>${fmt(p, 3)} MPa <span class="unit">(đặt = [p])</span></dd></div>
+          <div><dt>Mₜ xấp xỉ</dt><dd>${fmt(Mt_approx, 2)} N·m <span class="unit">(μ·N·r)</span></dd></div>
+        </dl>
+        <p class="note" style="margin:10px 0 0">
+          Với guốc leading/trailing, lực N và phân bố mô men cần phân tích cân bằng guốc riêng;
+          công thức trên cho bề rộng từ điều kiện áp suất trung bình đều.
+        </p>
+      `;
+    }
+
+    function calcRect() {
+      const Fn = +$("r-Fn").value;
+      const p = +$("r-p").value;
+      const L = +$("r-L").value;
+      if (!(Fn > 0 && p > 0 && L > 0)) {
+        toast("Nhập Fₙ, [p], L > 0");
+        return;
+      }
+      const b = Fn / (p * L);
+      const A = b * L;
+      $("out-rect").hidden = false;
+      $("out-rect").innerHTML = `
+        <div>Bề rộng má</div>
+        <div class="big">b = ${fmt(b, 2)} mm</div>
+        <dl class="kv">
+          <div><dt>Diện tích A</dt><dd>${fmt(A, 1)} mm²</dd></div>
+          <div><dt>Áp suất p</dt><dd>${fmt(p, 3)} MPa</dd></div>
+        </dl>
+      `;
+    }
+
+    $("btn-disc").addEventListener("click", calcDisc);
+    $("btn-drum").addEventListener("click", calcDrum);
+    $("btn-rect").addEventListener("click", calcRect);
+
+    // initial
+    calcDisc();
+  </script>
+</body>
+</html>
